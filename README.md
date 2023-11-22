@@ -1,7 +1,15 @@
 # quickpose-react-native-pose-estimation
 
-![](img/react-native-demo.png)
+![](img/react-native-demo.jpg)
 
+To install:
+
+	cd AwesomeProject
+	npm install
+	cd ios
+	pod install
+	cd ../
+	npx react-native start
 
 A basic example of React Native running a fast pose estimation library.
 
