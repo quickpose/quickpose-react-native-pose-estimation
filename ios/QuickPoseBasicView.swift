@@ -54,41 +54,75 @@ struct QuickPoseBasicView: View {
     }
   }
 
-  static func parseFeature(_ string: String) -> QuickPose.Feature? {
+  static func parseFeature(_ string: String, style: QuickPose.Style = QuickPose.Style()) -> QuickPose.Feature? {
     let parts = string.split(separator: ".").map(String.init)
     guard let category = parts.first else { return nil }
 
     switch category {
     case "overlay":
       guard let group = parseLandmarksGroup(Array(parts.dropFirst())) else { return nil }
-      return .overlay(group)
+      return .overlay(group, style: style)
 
     case "showPoints":
-      return .showPoints()
+      return .showPoints(style: style)
 
     case "rangeOfMotion":
       guard let rom = parseRangeOfMotion(Array(parts.dropFirst())) else { return nil }
-      return .rangeOfMotion(rom)
+      return .rangeOfMotion(rom, style: style)
 
     case "fitness":
       guard let fitness = parseFitnessFeature(Array(parts.dropFirst())) else { return nil }
-      return .fitness(fitness)
+      return .fitness(fitness, style: style)
 
     case "raisedFingers":
       let side = parts.count > 1 ? parseSide(parts[1]) : nil
-      return .raisedFingers(side: side)
+      return .raisedFingers(side: side, style: style)
 
     case "thumbsUp":
       let side = parts.count > 1 ? parseSide(parts[1]) : nil
-      return .thumbsUp(side: side)
+      return .thumbsUp(side: side, style: style)
 
     case "thumbsUpOrDown":
       let side = parts.count > 1 ? parseSide(parts[1]) : nil
-      return .thumbsUpOrDown(side: side)
+      return .thumbsUpOrDown(side: side, style: style)
 
     default:
       return nil
     }
+  }
+
+  static func parseStyle(from dict: [String: Any]) -> QuickPose.Style {
+    let color: UIColor = {
+      if let hex = dict["color"] as? String {
+        return UIColor.fromHex(hex) ?? .white
+      }
+      return .white
+    }()
+
+    let relativeFontSize = dict["relativeFontSize"] as? Double ?? 1.0
+    let relativeArcSize = dict["relativeArcSize"] as? Double ?? 1.0
+    let relativeLineWidth = dict["relativeLineWidth"] as? Double ?? 1.0
+    let cornerRadius = dict["cornerRadius"] as? Double ?? 0.0
+
+    var conditionalColors: [QuickPose.Style.ConditionalColor]? = nil
+    if let ccArray = dict["conditionalColors"] as? [[String: Any]] {
+      conditionalColors = ccArray.compactMap { cc in
+        guard let colorHex = cc["color"] as? String,
+              let ccColor = UIColor.fromHex(colorHex) else { return nil }
+        let min = cc["min"] as? Double
+        let max = cc["max"] as? Double
+        return QuickPose.Style.ConditionalColor(min: min, max: max, color: ccColor)
+      }
+    }
+
+    return QuickPose.Style(
+      relativeFontSize: relativeFontSize,
+      relativeArcSize: relativeArcSize,
+      relativeLineWidth: relativeLineWidth,
+      cornerRadius: cornerRadius,
+      color: color,
+      conditionalColors: conditionalColors
+    )
   }
 
   static func parseLandmarksGroup(_ parts: [String]) -> QuickPose.Landmarks.Group? {
@@ -168,6 +202,35 @@ struct QuickPoseBasicView: View {
     case "left": return .left
     case "right": return .right
     default: return nil
+    }
+  }
+}
+
+extension UIColor {
+  static func fromHex(_ hex: String) -> UIColor? {
+    var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+    hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+    var rgb: UInt64 = 0
+    guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else { return nil }
+
+    switch hexSanitized.count {
+    case 6:
+      return UIColor(
+        red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,
+        green: CGFloat((rgb & 0x00FF00) >> 8) / 255.0,
+        blue: CGFloat(rgb & 0x0000FF) / 255.0,
+        alpha: 1.0
+      )
+    case 8:
+      return UIColor(
+        red: CGFloat((rgb & 0xFF000000) >> 24) / 255.0,
+        green: CGFloat((rgb & 0x00FF0000) >> 16) / 255.0,
+        blue: CGFloat((rgb & 0x0000FF00) >> 8) / 255.0,
+        alpha: CGFloat(rgb & 0x000000FF) / 255.0
+      )
+    default:
+      return nil
     }
   }
 }

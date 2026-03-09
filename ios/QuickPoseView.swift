@@ -37,6 +37,10 @@ class QuickPoseView: UIView {
     didSet { updateFeatures() }
   }
 
+  @objc var stylesJson: String = "" {
+    didSet { updateFeatures() }
+  }
+
   @objc var useFrontCamera: Bool = true {
     didSet { tryStart() }
   }
@@ -54,12 +58,25 @@ class QuickPoseView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
 
+  private func parseStylesMap() -> [String: QuickPose.Style] {
+    guard !stylesJson.isEmpty,
+          let data = stylesJson.data(using: .utf8),
+          let dict = try? JSONSerialization.jsonObject(with: data) as? [String: [String: Any]]
+    else { return [:] }
+    var result: [String: QuickPose.Style] = [:]
+    for (key, value) in dict {
+      result[key] = QuickPoseBasicView.parseStyle(from: value)
+    }
+    return result
+  }
+
   private func updateFeatures() {
     guard hasStarted, let qp = quickPose else {
       tryStart()
       return
     }
-    let parsed = features.compactMap { QuickPoseBasicView.parseFeature($0) }
+    let styles = parseStylesMap()
+    let parsed = features.compactMap { QuickPoseBasicView.parseFeature($0, style: styles[$0] ?? QuickPose.Style()) }
     guard !parsed.isEmpty else { return }
     qp.update(features: parsed)
   }
@@ -71,7 +88,8 @@ class QuickPoseView: UIView {
     let qp = QuickPose(sdkKey: sdkKey)
     quickPose = qp
 
-    let parsedFeatures = features.compactMap { QuickPoseBasicView.parseFeature($0) }
+    let styles = parseStylesMap()
+    let parsedFeatures = features.compactMap { QuickPoseBasicView.parseFeature($0, style: styles[$0] ?? QuickPose.Style()) }
     guard !parsedFeatures.isEmpty else { return }
 
     let wrapperView = QuickPoseCameraWrapperView(

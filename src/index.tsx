@@ -5,6 +5,7 @@ import NativeQuickPoseView from './QuickPoseViewNativeComponent';
 export const QuickPoseView: React.FC<QuickPoseViewProps> = ({
   sdkKey,
   features,
+  featureStyles,
   useFrontCamera = true,
   style,
   onUpdate,
@@ -20,10 +21,13 @@ export const QuickPoseView: React.FC<QuickPoseViewProps> = ({
     });
   };
 
+  const stylesJson = featureStyles ? JSON.stringify(featureStyles) : undefined;
+
   return (
     <NativeQuickPoseView
       sdkKey={sdkKey}
       features={features}
+      stylesJson={stylesJson}
       useFrontCamera={useFrontCamera}
       style={style}
       onUpdate={handleUpdate}
@@ -31,4 +35,4 @@ export const QuickPoseView: React.FC<QuickPoseViewProps> = ({
   );
 };
 
-export type { QuickPoseViewProps, QuickPoseUpdateEvent, QuickPoseResult } from './types';
+export type { QuickPoseViewProps, QuickPoseUpdateEvent, QuickPoseResult, QuickPoseStyle, QuickPoseConditionalColor } from './types';

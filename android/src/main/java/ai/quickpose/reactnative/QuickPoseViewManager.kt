@@ -3,6 +3,7 @@ package ai.quickpose.reactnative
 import ai.quickpose.camera.QuickPoseCameraSwitchView
 import ai.quickpose.core.*
 import android.Manifest
+import android.graphics.Color
 import org.json.JSONArray
 import org.json.JSONObject
 import android.content.pm.PackageManager
@@ -34,6 +35,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
 
     private var sdkKey: String = ""
     private var featureStrings: List<String> = emptyList()
+    private var stylesMap: Map<String, Style> = emptyMap()
     private var useFrontCamera: Boolean = true
     private var hasStarted = false
 
@@ -67,12 +69,23 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     fun setFeatures(view: FrameLayout, features: ReadableArray?) {
         featureStrings = (0 until (features?.size() ?: 0)).mapNotNull { features?.getString(it) }
         if (hasStarted) {
-            val parsed = featureStrings.mapNotNull { parseFeature(it) }.toTypedArray()
+            val parsed = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
             if (parsed.isNotEmpty()) {
                 quickPose?.update(parsed)
             }
         } else {
             tryStart(view)
+        }
+    }
+
+    @ReactProp(name = "stylesJson")
+    fun setStylesJson(view: FrameLayout, json: String?) {
+        stylesMap = parseStylesJson(json ?: "")
+        if (hasStarted) {
+            val parsed = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
+            if (parsed.isNotEmpty()) {
+                quickPose?.update(parsed)
+            }
         }
     }
 
@@ -170,7 +183,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             )
         )
 
-        val features = featureStrings.mapNotNull { parseFeature(it) }.toTypedArray()
+        val features = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
         if (features.isEmpty()) return
 
         val lifecycleOwner = activity as? androidx.lifecycle.LifecycleOwner ?: return
@@ -210,17 +223,69 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             .build()
     }
 
+    // --- Style JSON parsing ---
+
+    private fun parseStylesJson(json: String): Map<String, Style> {
+        if (json.isEmpty()) return emptyMap()
+        return try {
+            val obj = JSONObject(json)
+            val result = mutableMapOf<String, Style>()
+            for (key in obj.keys()) {
+                val styleObj = obj.getJSONObject(key)
+                result[key] = parseStyle(styleObj)
+            }
+            result
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    private fun parseStyle(obj: JSONObject): Style {
+        val color = if (obj.has("color")) {
+            try { Color.valueOf(Color.parseColor(obj.getString("color"))) } catch (e: Exception) { Color.valueOf(Color.WHITE) }
+        } else {
+            Color.valueOf(Color.WHITE)
+        }
+
+        val relativeFontSize = obj.optDouble("relativeFontSize", 1.0).toFloat()
+        val relativeArcSize = obj.optDouble("relativeArcSize", 1.0).toFloat()
+        val relativeLineWidth = obj.optDouble("relativeLineWidth", 1.0).toFloat()
+        val cornerRadius = obj.optDouble("cornerRadius", 0.0).toFloat()
+
+        val conditionalColors = if (obj.has("conditionalColors")) {
+            val arr = obj.getJSONArray("conditionalColors")
+            (0 until arr.length()).mapNotNull { i ->
+                val cc = arr.getJSONObject(i)
+                val ccColor = try { Color.valueOf(Color.parseColor(cc.getString("color"))) } catch (e: Exception) { return@mapNotNull null }
+                val min = if (cc.isNull("min")) null else cc.optDouble("min").toFloat()
+                val max = if (cc.isNull("max")) null else cc.optDouble("max").toFloat()
+                Style.ConditionalColor(min, max, ccColor)
+            }
+        } else {
+            null
+        }
+
+        return Style(
+            relativeFontSize = relativeFontSize,
+            relativeArcSize = relativeArcSize,
+            relativeLineWidth = relativeLineWidth,
+            color = color,
+            cornerRadius = cornerRadius,
+            conditionalColors = conditionalColors
+        )
+    }
+
     // --- Feature string parsing ---
 
-    private fun parseFeature(string: String): Feature? {
+    private fun parseFeature(string: String, style: Style = Style()): Feature? {
         val parts = string.split(".")
         val category = parts.firstOrNull() ?: return null
 
         return when (category) {
-            "overlay" -> parseLandmarksGroup(parts.drop(1))?.let { Feature.Overlay(it) }
-            "showPoints" -> Feature.ShowPoints()
-            "rangeOfMotion" -> parseRangeOfMotion(parts.drop(1))?.let { Feature.RangeOfMotion(it) }
-            "fitness" -> parseFitnessFeature(parts.drop(1))?.let { Feature.Fitness(it) }
+            "overlay" -> parseLandmarksGroup(parts.drop(1))?.let { Feature.Overlay(it, style) }
+            "showPoints" -> Feature.ShowPoints(style)
+            "rangeOfMotion" -> parseRangeOfMotion(parts.drop(1))?.let { Feature.RangeOfMotion(it, style) }
+            "fitness" -> parseFitnessFeature(parts.drop(1))?.let { Feature.Fitness(it, style) }
             else -> null
         }
     }

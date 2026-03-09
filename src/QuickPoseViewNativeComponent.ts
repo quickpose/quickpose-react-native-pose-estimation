@@ -5,6 +5,7 @@ import type { DirectEventHandler } from 'react-native/Libraries/Types/CodegenTyp
 interface NativeProps extends ViewProps {
   sdkKey: string;
   features: ReadonlyArray<string>;
+  stylesJson?: string;
   useFrontCamera?: boolean;
   onUpdate?: DirectEventHandler<{resultsJson: string; feedback: string}>;
 }
