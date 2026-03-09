@@ -9,11 +9,9 @@
     "src",
     "ios",
     "android",
+    "!android/build",
     "quickpose-react-native.podspec",
-    "react-native.config.js",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__"
+    "react-native.config.js"
   ],
   "scripts": {
     "typescript": "tsc --noEmit"
@@ -26,7 +24,10 @@
     "mediapipe",
     "blazepose"
   ],
-  "repository": "https://github.com/quickpose/quickpose-react-native-pose-estimation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quickpose/quickpose-react-native-pose-estimation.git"
+  },
   "author": "QuickPose.ai",
   "license": "MIT",
   "homepage": "https://docs.quickpose.ai/docs/MobileSDK",
