@@ -1,6 +1,6 @@
 {
   "name": "@quickpose/react-native",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "React Native plugin for QuickPose ML pose estimation SDK",
   "main": "src/index",
   "types": "src/index",
