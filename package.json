@@ -1,0 +1,43 @@
+{
+  "name": "@quickpose/react-native",
+  "version": "0.2.0",
+  "description": "React Native plugin for QuickPose ML pose estimation SDK",
+  "main": "src/index",
+  "types": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "ios",
+    "android",
+    "quickpose-react-native.podspec",
+    "react-native.config.js",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "scripts": {
+    "typescript": "tsc --noEmit"
+  },
+  "keywords": [
+    "react-native",
+    "quickpose",
+    "pose-estimation",
+    "fitness",
+    "mediapipe",
+    "blazepose"
+  ],
+  "repository": "https://github.com/quickpose/quickpose-react-native-pose-estimation",
+  "author": "QuickPose.ai",
+  "license": "MIT",
+  "homepage": "https://docs.quickpose.ai/docs/MobileSDK",
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-native": ">=0.75.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "18.3.1",
+    "react-native": "0.76.9",
+    "typescript": "^5.0.0"
+  }
+}
