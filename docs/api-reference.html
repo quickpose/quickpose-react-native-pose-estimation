@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickPose React Native — API Reference</title>
+<style>
+  :root { --brand: #5970F6; --bg: #f8f9fc; --card: #fff; --border: #e2e5f1; --text: #1a1a2e; --muted: #6b7280; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  header { background: var(--brand); color: white; padding: 40px 24px; text-align: center; }
+  header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  header p { opacity: 0.85; font-size: 16px; }
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+  h2 { font-size: 22px; margin: 32px 0 16px; color: var(--brand); border-bottom: 2px solid var(--brand); padding-bottom: 8px; }
+  h3 { font-size: 17px; margin: 20px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .card-desc { color: var(--muted); font-size: 14px; }
+  .prop-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .prop-table th { text-align: left; padding: 10px 12px; background: var(--bg); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 2px solid var(--border); }
+  .prop-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
+  .prop-name { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--brand); font-weight: 600; }
+  .prop-type { font-family: 'SF Mono', 'Fira Code', monospace; color: #d97706; font-size: 13px; }
+  .prop-default { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--muted); font-size: 13px; }
+  .required { color: #dc2626; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-left: 6px; }
+  .optional { color: #16a34a; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-left: 6px; }
+  code { background: #f1f3f9; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; }
+  pre .kw { color: #cba6f7; }
+  pre .str { color: #a6e3a1; }
+  pre .cm { color: #6c7086; }
+  pre .fn { color: #89b4fa; }
+  pre .num { color: #fab387; }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  @media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feature-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+  .feature-item code { background: transparent; padding: 0; }
+  .feature-label { font-size: 13px; color: var(--muted); }
+  .section-note { background: #eef0fe; border-left: 4px solid var(--brand); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .layout-diagram { background: #1e1e2e; border-radius: 12px; padding: 24px; margin: 16px 0; color: #cdd6f4; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.4; text-align: center; }
+  .layout-diagram .box { border: 1px dashed #6c7086; border-radius: 6px; padding: 12px; margin: 8px auto; max-width: 320px; }
+  .layout-diagram .box-label { color: #89b4fa; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; }
+  .layout-diagram .camera-box { border-color: #a6e3a1; background: rgba(166,227,161,0.08); }
+  .layout-diagram .overlay-box { border-color: #cba6f7; background: rgba(203,166,247,0.08); min-height: 60px; }
+  .event-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .event-table th { text-align: left; padding: 8px 12px; background: var(--bg); font-size: 13px; color: var(--muted); border-bottom: 2px solid var(--border); }
+  .event-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>QuickPose React Native</h1>
+  <p>User-configurable props, features, layout, and event data</p>
+</header>
+
+<div class="container">
+
+  <!-- COMPONENT USAGE -->
+  <h2>Quick Start</h2>
+  <pre><span class="kw">import</span> { QuickPoseView } <span class="kw">from</span> <span class="str">'@quickpose/react-native'</span>;
+
+&lt;<span class="fn">QuickPoseView</span>
+  <span class="fn">sdkKey</span>=<span class="str">"YOUR_SDK_KEY"</span>
+  <span class="fn">features</span>={[<span class="str">'overlay.wholeBody'</span>]}
+  <span class="fn">useFrontCamera</span>={<span class="kw">true</span>}
+  <span class="fn">style</span>={{ <span class="fn">flex</span>: <span class="num">1</span> }}
+  <span class="fn">onUpdate</span>={(<span class="fn">event</span>) =&gt; {
+    <span class="kw">const</span> { results, feedback } = event.nativeEvent;
+    <span class="cm">// results: [{ feature: string, value: number }]</span>
+    <span class="cm">// feedback: string | null</span>
+  }}
+/&gt;</pre>
+
+  <!-- PROPS -->
+  <h2>Props</h2>
+  <table class="prop-table">
+    <thead>
+      <tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="prop-name">sdkKey</span><span class="required">required</span></td>
+        <td><span class="prop-type">string</span></td>
+        <td>—</td>
+        <td>Your QuickPose SDK key from <a href="https://dev.quickpose.ai">dev.quickpose.ai</a></td>
+      </tr>
+      <tr>
+        <td><span class="prop-name">features</span><span class="required">required</span></td>
+        <td><span class="prop-type">string[]</span></td>
+        <td>—</td>
+        <td>Array of feature strings to detect. Can be updated at runtime — the camera stays running and features hot-swap without restart.</td>
+      </tr>
+      <tr>
+        <td><span class="prop-name">useFrontCamera</span><span class="optional">optional</span></td>
+        <td><span class="prop-type">boolean</span></td>
+        <td><span class="prop-default">true</span></td>
+        <td>Whether to use the front-facing camera.</td>
+      </tr>
+      <tr>
+        <td><span class="prop-name">style</span><span class="optional">optional</span></td>
+        <td><span class="prop-type">ViewStyle</span></td>
+        <td>—</td>
+        <td>Standard React Native view style. Controls the camera view size and position. Use <code>flex: 1</code> for fullscreen, or set explicit <code>width</code>/<code>height</code> for a smaller viewport.</td>
+      </tr>
+      <tr>
+        <td><span class="prop-name">onUpdate</span><span class="optional">optional</span></td>
+        <td><span class="prop-type">(event) =&gt; void</span></td>
+        <td>—</td>
+        <td>Called every frame with detection results and feedback. See Event Data below.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- LAYOUT -->
+  <h2>Layout &amp; Sizing</h2>
+  <p>The <code>QuickPoseView</code> is a standard React Native view. You control its size and position with the <code>style</code> prop — the native camera preview and skeleton overlay fill the view bounds automatically.</p>
+
+  <div class="layout-diagram">
+    <div class="box">
+      <div class="box-label">Your Container View</div>
+      <div class="box camera-box">
+        <div class="box-label">QuickPoseView (style prop)</div>
+        Camera Preview<br/>+ Skeleton Overlay
+      </div>
+      <div style="color: #6c7086; font-size: 11px; margin-top: 8px;">Your own UI (buttons, text, etc.) goes outside or absolutely positioned on top</div>
+    </div>
+  </div>
+
+  <h3>Common Layout Patterns</h3>
+  <div class="card">
+    <div class="card-title">Fullscreen Camera</div>
+    <pre><span class="fn">style</span>={{ <span class="fn">flex</span>: <span class="num">1</span> }}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Fixed-size Camera Window</div>
+    <pre><span class="fn">style</span>={{ <span class="fn">width</span>: <span class="num">300</span>, <span class="fn">height</span>: <span class="num">400</span>, <span class="fn">borderRadius</span>: <span class="num">12</span> }}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">Camera with UI Below</div>
+    <pre>&lt;<span class="fn">View</span> style={{ <span class="fn">flex</span>: <span class="num">1</span> }}&gt;
+  &lt;<span class="fn">QuickPoseView</span> style={{ <span class="fn">flex</span>: <span class="num">3</span> }} ... /&gt;
+  &lt;<span class="fn">View</span> style={{ <span class="fn">flex</span>: <span class="num">1</span> }}&gt;
+    <span class="cm">{/* Your controls, counters, etc. */}</span>
+  &lt;/<span class="fn">View</span>&gt;
+&lt;/<span class="fn">View</span>&gt;</pre>
+  </div>
+
+  <div class="section-note">
+    The overlay (skeleton lines, joint angles, etc.) is rendered natively by the SDK and fills the camera view automatically. You don't need to position or style the overlay separately.
+  </div>
+
+  <!-- EVENT DATA -->
+  <h2>Event Data (<code>onUpdate</code>)</h2>
+  <p>The callback receives an event with <code>event.nativeEvent</code> containing:</p>
+  <table class="event-table">
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="prop-name">results</span></td>
+        <td><span class="prop-type">{ feature: string, value: number }[]</span></td>
+        <td>One entry per feature in the <code>features</code> array. The <code>value</code> meaning depends on feature type — see below.</td>
+      </tr>
+      <tr>
+        <td><span class="prop-name">feedback</span></td>
+        <td><span class="prop-type">string | null</span></td>
+        <td>User guidance text from the SDK, e.g. "Move further away" or "Keep your arm straight".</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Value Interpretation by Feature Type</h3>
+  <table class="event-table">
+    <thead><tr><th>Feature Type</th><th>Value Range</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Overlay</td><td><code>0</code> or <code>1</code></td><td>1 = body detected, 0 = not detected</td></tr>
+      <tr><td>Range of Motion</td><td><code>0–360</code></td><td>Joint angle in degrees</td></tr>
+      <tr><td>Fitness (reps)</td><td><code>0.0–1.0</code></td><td>Exercise progress (0 = start position, 1 = end position). Count reps by tracking 0→1→0 cycles.</td></tr>
+      <tr><td>Fitness (plank)</td><td><code>0.0–1.0</code></td><td>Hold quality (1.0 = perfect form)</td></tr>
+      <tr><td>Raised Fingers</td><td><code>0–5</code></td><td>Number of raised fingers</td></tr>
+      <tr><td>Thumbs Up/Down</td><td><code>-1, 0, 1</code></td><td>-1 = down, 0 = neutral, 1 = up</td></tr>
+    </tbody>
+  </table>
+
+  <!-- FEATURES -->
+  <h2>Available Features</h2>
+  <p>Pass these strings in the <code>features</code> array. Features can be hot-swapped at runtime.</p>
+
+  <h3>Overlay</h3>
+  <p>Draw skeleton overlays on detected body parts.</p>
+  <div class="feature-grid">
+    <div class="feature-item"><code>overlay.wholeBody</code><br><span class="feature-label">Full body skeleton</span></div>
+    <div class="feature-item"><code>overlay.wholeBodyAndHead</code><br><span class="feature-label">Full body + head outline</span></div>
+    <div class="feature-item"><code>overlay.upperBody</code><br><span class="feature-label">Torso and arms</span></div>
+    <div class="feature-item"><code>overlay.straightArmsUpperBody</code><br><span class="feature-label">Upper body with straight arm lines</span></div>
+    <div class="feature-item"><code>overlay.toWristsUpperBody</code><br><span class="feature-label">Upper body to wrists</span></div>
+    <div class="feature-item"><code>overlay.lowerBody</code><br><span class="feature-label">Hips and legs</span></div>
+    <div class="feature-item"><code>overlay.shoulders</code><br><span class="feature-label">Shoulder line</span></div>
+    <div class="feature-item"><code>overlay.arm.left</code> / <code>.right</code><br><span class="feature-label">Single arm</span></div>
+    <div class="feature-item"><code>overlay.armToWrist.left</code> / <code>.right</code><br><span class="feature-label">Arm to wrist</span></div>
+    <div class="feature-item"><code>overlay.armNoElbow.left</code> / <code>.right</code><br><span class="feature-label">Arm without elbow joint</span></div>
+    <div class="feature-item"><code>overlay.straightArm.left</code> / <code>.right</code><br><span class="feature-label">Straight arm line</span></div>
+    <div class="feature-item"><code>overlay.hand.left</code> / <code>.right</code><br><span class="feature-label">Hand landmarks</span></div>
+    <div class="feature-item"><code>overlay.leg.left</code> / <code>.right</code><br><span class="feature-label">Single leg</span></div>
+    <div class="feature-item"><code>overlay.arms</code><br><span class="feature-label">Both arms</span></div>
+    <div class="feature-item"><code>overlay.legs</code><br><span class="feature-label">Both legs</span></div>
+    <div class="feature-item"><code>overlay.hips</code><br><span class="feature-label">Hip line</span></div>
+    <div class="feature-item"><code>overlay.elbows</code><br><span class="feature-label">Elbow joints</span></div>
+    <div class="feature-item"><code>overlay.knees</code><br><span class="feature-label">Knee joints</span></div>
+    <div class="feature-item"><code>overlay.head</code><br><span class="feature-label">Head outline</span></div>
+    <div class="feature-item"><code>showPoints</code><br><span class="feature-label">All 33 body landmarks as dots</span></div>
+  </div>
+
+  <h3>Range of Motion</h3>
+  <p>Measure joint angles in degrees. Returns angle value each frame.</p>
+  <div class="feature-grid">
+    <div class="feature-item"><code>rangeOfMotion.shoulder.left</code> / <code>.right</code><br><span class="feature-label">Shoulder abduction/flexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.elbow.left</code> / <code>.right</code><br><span class="feature-label">Elbow flexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.hip.left</code> / <code>.right</code><br><span class="feature-label">Hip flexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.knee.left</code> / <code>.right</code><br><span class="feature-label">Knee flexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.ankle.left</code> / <code>.right</code><br><span class="feature-label">Ankle dorsiflexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.neck</code><br><span class="feature-label">Neck lateral flexion</span></div>
+    <div class="feature-item"><code>rangeOfMotion.back</code><br><span class="feature-label">Back/spine flexion</span></div>
+  </div>
+
+  <h3>Fitness</h3>
+  <p>Exercise tracking with rep counting (0→1→0 cycle) or hold detection. Returns progress 0.0–1.0 each frame.</p>
+  <div class="feature-grid">
+    <div class="feature-item"><code>fitness.squats</code><br><span class="feature-label">Squat reps</span></div>
+    <div class="feature-item"><code>fitness.pushUps</code><br><span class="feature-label">Push-up reps</span></div>
+    <div class="feature-item"><code>fitness.jumpingJacks</code><br><span class="feature-label">Jumping jack reps</span></div>
+    <div class="feature-item"><code>fitness.sumoSquats</code><br><span class="feature-label">Sumo squat reps</span></div>
+    <div class="feature-item"><code>fitness.lunges.left</code> / <code>.right</code><br><span class="feature-label">Lunge reps (per side)</span></div>
+    <div class="feature-item"><code>fitness.sideLunges.left</code> / <code>.right</code><br><span class="feature-label">Side lunge reps (per side)</span></div>
+    <div class="feature-item"><code>fitness.sitUps</code><br><span class="feature-label">Sit-up reps</span></div>
+    <div class="feature-item"><code>fitness.cobraWings</code><br><span class="feature-label">Cobra wings reps</span></div>
+    <div class="feature-item"><code>fitness.plank</code><br><span class="feature-label">Plank hold (quality 0–1)</span></div>
+    <div class="feature-item"><code>fitness.plankStraightArm</code><br><span class="feature-label">Straight-arm plank hold</span></div>
+    <div class="feature-item"><code>fitness.bicepCurls</code><br><span class="feature-label">Bicep curl reps (both arms)</span></div>
+    <div class="feature-item"><code>fitness.bicepCurlsSingleArm.left</code> / <code>.right</code><br><span class="feature-label">Single-arm bicep curls</span></div>
+    <div class="feature-item"><code>fitness.legRaises</code><br><span class="feature-label">Leg raise reps</span></div>
+    <div class="feature-item"><code>fitness.gluteBridge</code><br><span class="feature-label">Glute bridge reps</span></div>
+    <div class="feature-item"><code>fitness.overheadDumbbellPress</code><br><span class="feature-label">Overhead press reps</span></div>
+    <div class="feature-item"><code>fitness.vUps</code><br><span class="feature-label">V-up reps</span></div>
+    <div class="feature-item"><code>fitness.lateralRaises</code><br><span class="feature-label">Lateral raise reps</span></div>
+    <div class="feature-item"><code>fitness.frontRaises</code><br><span class="feature-label">Front raise reps</span></div>
+    <div class="feature-item"><code>fitness.hipAbductionStanding.left</code> / <code>.right</code><br><span class="feature-label">Standing hip abduction</span></div>
+  </div>
+
+  <h3>Input / Gesture</h3>
+  <p>Hand gesture recognition.</p>
+  <div class="feature-grid">
+    <div class="feature-item"><code>raisedFingers</code><br><span class="feature-label">Count raised fingers (0–5). Optional: <code>raisedFingers.left</code> / <code>.right</code></span></div>
+    <div class="feature-item"><code>thumbsUp</code><br><span class="feature-label">Detect thumbs up (value: 1). Optional: <code>thumbsUp.left</code> / <code>.right</code></span></div>
+    <div class="feature-item"><code>thumbsUpOrDown</code><br><span class="feature-label">Detect thumbs up (1) or down (-1). Optional: <code>thumbsUpOrDown.left</code> / <code>.right</code></span></div>
+  </div>
+
+  <!-- MULTIPLE FEATURES -->
+  <h2>Multiple Simultaneous Features</h2>
+  <p>Pass multiple feature strings to detect several things at once. Each gets its own entry in the <code>results</code> array:</p>
+  <pre><span class="fn">features</span>={[
+  <span class="str">'overlay.upperBody'</span>,
+  <span class="str">'rangeOfMotion.shoulder.right'</span>,
+  <span class="str">'fitness.bicepCurls'</span>,
+]}
+
+<span class="cm">// onUpdate results:</span>
+<span class="cm">// [</span>
+<span class="cm">//   { feature: 'overlay.upperBody', value: 1 },</span>
+<span class="cm">//   { feature: 'rangeOfMotion.shoulder.right', value: 45.2 },</span>
+<span class="cm">//   { feature: 'fitness.bicepCurls', value: 0.73 },</span>
+<span class="cm">// ]</span></pre>
+
+  <!-- PLATFORM NOTES -->
+  <h2>Platform Setup</h2>
+  <div class="card">
+    <div class="card-title">iOS</div>
+    <div class="card-desc">Add <code>NSCameraUsageDescription</code> to Info.plist. Minimum deployment target iOS 15.0.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Android</div>
+    <div class="card-desc">Camera permission is requested at runtime by the SDK. Minimum SDK 24.</div>
+  </div>
+
+  <div style="text-align: center; padding: 32px 0; color: var(--muted); font-size: 13px;">
+    Powered by <a href="https://quickpose.ai" style="color: var(--brand);">QuickPose.ai</a>
+  </div>
+</div>
+
+</body>
+</html>
