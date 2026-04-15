@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.76.9):
     - hermes-engine/Pre-built (= 0.76.9)
   - hermes-engine/Pre-built (0.76.9)
-  - quickpose-react-native (0.2.0):
+  - quickpose-react-native (0.2.6):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1830,7 +1830,7 @@ SPEC CHECKSUMS:
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 12f7fefc143443b7948b8af549b6c9456ff6dcb1
   hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
-  quickpose-react-native: 6acaed3967a68afc6e7bc63579638d5743642e03
+  quickpose-react-native: d2f780b1e79d838dd9e55d9691bc26b7b23dba1a
   QuickPoseCamera: 77b30a222ef4fabfd24305060a2a6d43658854c9
   QuickPoseCore: 81c66625a930ac5ef8fa702d20a1086ec6e504b0
   QuickPoseSwiftUI: e69fec45353402f539c8bba489954fd44def5dea

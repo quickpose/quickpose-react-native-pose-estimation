@@ -2,6 +2,24 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.0] - 2026-04-15
+
+### Added
+- `inside` feature (camera-edge limb containment detection) and `overlayHasCameraAsBackground` feature
+- `head` and `wholeBodyAndHead` landmark groups (matches iOS/Android SDK)
+- `hidden` and `edgeInsets` style keys
+- Exported helper types: `ParsedFeature`, `Side`, `LandmarksGroup`, `ROMJoint`, `FitnessExercise`, `QuickPoseEdgeInsets`
+- Exported `parseFeatureString` for consumers who want to pre-parse features
+
+### Changed
+- Feature parsing moved from native code to JS — native modules now receive structured `ParsedFeature` objects instead of strings + separate `stylesJson`. Simplifies adding new feature types.
+- Android: bumped `ai.quickpose:quickpose-core` to `0.19`
+- **Breaking:** `QuickPoseConditionalColor.min` / `max` are now optional (`?: number`) instead of `number | null`. Consumers passing `null` should switch to omitting the field or passing `undefined`.
+
+### Removed
+- `QuickPoseBasicView` (iOS) — folded into the main `QuickPoseView`
+- `stylesJson` prop — styles are now embedded in the feature object
+
 ## [0.2.6] - 2026-03-09
 
 ### Added

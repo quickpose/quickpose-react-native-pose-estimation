@@ -9,13 +9,13 @@ import org.json.JSONObject
 import android.content.pm.PackageManager
 import android.view.Choreographer
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -34,10 +34,10 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     private var cameraSwitchView: QuickPoseCameraSwitchView? = null
 
     private var sdkKey: String = ""
-    private var featureStrings: List<String> = emptyList()
-    private var stylesMap: Map<String, Style> = emptyMap()
+    private var featureMaps: List<ReadableMap> = emptyList()
     private var useFrontCamera: Boolean = true
     private var hasStarted = false
+    private var currentFeatureKeys: List<String> = emptyList()
 
     override fun getName(): String = REACT_CLASS
 
@@ -67,25 +67,15 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
 
     @ReactProp(name = "features")
     fun setFeatures(view: FrameLayout, features: ReadableArray?) {
-        featureStrings = (0 until (features?.size() ?: 0)).mapNotNull { features?.getString(it) }
+        featureMaps = if (features != null) (0 until features.size()).mapNotNull { features.getMap(it) } else emptyList()
         if (hasStarted) {
-            val parsed = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
-            if (parsed.isNotEmpty()) {
-                quickPose?.update(parsed)
+            val keyed = mapFeatures()
+            if (keyed.isNotEmpty()) {
+                currentFeatureKeys = keyed.map { it.first }
+                quickPose?.update(keyed.map { it.second }.toTypedArray())
             }
         } else {
             tryStart(view)
-        }
-    }
-
-    @ReactProp(name = "stylesJson")
-    fun setStylesJson(view: FrameLayout, json: String?) {
-        stylesMap = parseStylesJson(json ?: "")
-        if (hasStarted) {
-            val parsed = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
-            if (parsed.isNotEmpty()) {
-                quickPose?.update(parsed)
-            }
         }
     }
 
@@ -96,7 +86,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     }
 
     private fun tryStart(view: FrameLayout) {
-        if (sdkKey.isEmpty() || featureStrings.isEmpty() || hasStarted) return
+        if (sdkKey.isEmpty() || featureMaps.isEmpty() || hasStarted) return
 
         val reactContext = view.context as? ThemedReactContext ?: return
 
@@ -114,7 +104,6 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
 
         hasStarted = true
 
-        // If already attached, start now
         if (view.isAttachedToWindow) {
             startCamera(reactContext, view)
             setupLayoutHack(view)
@@ -183,8 +172,10 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             )
         )
 
-        val features = featureStrings.mapNotNull { parseFeature(it, stylesMap[it] ?: Style()) }.toTypedArray()
-        if (features.isEmpty()) return
+        val keyed = mapFeatures()
+        if (keyed.isEmpty()) return
+        currentFeatureKeys = keyed.map { it.first }
+        val features = keyed.map { it.second }.toTypedArray()
 
         val lifecycleOwner = activity as? androidx.lifecycle.LifecycleOwner ?: return
         lifecycleOwner.lifecycleScope.launch {
@@ -194,11 +185,12 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
                 onFrame = { status, _, featureResults, feedback, _ ->
                     if (status is Status.Success) {
                         val jsonArray = JSONArray()
-                        for ((i, featureString) in featureStrings.withIndex()) {
-                            val entries = featureResults.entries.toList()
+                        val featureKeys = currentFeatureKeys
+                        val entries = featureResults.entries.toList()
+                        for ((i, featureKey) in featureKeys.withIndex()) {
                             if (i < entries.size) {
                                 val obj = JSONObject()
-                                obj.put("feature", featureString)
+                                obj.put("feature", featureKey)
                                 obj.put("value", entries[i].value.value.toDouble())
                                 jsonArray.put(obj)
                             }
@@ -223,79 +215,52 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             .build()
     }
 
-    // --- Style JSON parsing ---
+    // MARK: - Feature dict → SDK Feature mapping
 
-    private fun parseStylesJson(json: String): Map<String, Style> {
-        if (json.isEmpty()) return emptyMap()
-        return try {
-            val obj = JSONObject(json)
-            val result = mutableMapOf<String, Style>()
-            for (key in obj.keys()) {
-                val styleObj = obj.getJSONObject(key)
-                result[key] = parseStyle(styleObj)
-            }
-            result
-        } catch (e: Exception) {
-            emptyMap()
+    private fun mapFeatures(): List<Pair<String, Feature>> {
+        return featureMaps.mapNotNull { map ->
+            val key = map.str("featureKey") ?: return@mapNotNull null
+            val feature = mapFeature(map) ?: return@mapNotNull null
+            Pair(key, feature)
         }
     }
 
-    private fun parseStyle(obj: JSONObject): Style {
-        val color = if (obj.has("color")) {
-            try { Color.valueOf(Color.parseColor(obj.getString("color"))) } catch (e: Exception) { Color.valueOf(Color.WHITE) }
-        } else {
-            Color.valueOf(Color.WHITE)
-        }
+    private fun mapFeature(map: ReadableMap): Feature? {
+        val type = map.str("type") ?: return null
+        val style = map.map("style")?.let { parseStyleFromMap(it) } ?: Style()
 
-        val relativeFontSize = obj.optDouble("relativeFontSize", 1.0).toFloat()
-        val relativeArcSize = obj.optDouble("relativeArcSize", 1.0).toFloat()
-        val relativeLineWidth = obj.optDouble("relativeLineWidth", 1.0).toFloat()
-        val cornerRadius = obj.optDouble("cornerRadius", 0.0).toFloat()
-
-        val conditionalColors = if (obj.has("conditionalColors")) {
-            val arr = obj.getJSONArray("conditionalColors")
-            (0 until arr.length()).mapNotNull { i ->
-                val cc = arr.getJSONObject(i)
-                val ccColor = try { Color.valueOf(Color.parseColor(cc.getString("color"))) } catch (e: Exception) { return@mapNotNull null }
-                val min = if (cc.isNull("min")) null else cc.optDouble("min").toFloat()
-                val max = if (cc.isNull("max")) null else cc.optDouble("max").toFloat()
-                Style.ConditionalColor(min, max, ccColor)
+        return when (type) {
+            "overlay" -> {
+                val group = groupForName(map.str("group"), sideForName(map.str("side")))
+                    ?: return null
+                Feature.Overlay(group, style)
             }
-        } else {
-            null
-        }
-
-        return Style(
-            relativeFontSize = relativeFontSize,
-            relativeArcSize = relativeArcSize,
-            relativeLineWidth = relativeLineWidth,
-            color = color,
-            cornerRadius = cornerRadius,
-            conditionalColors = conditionalColors
-        )
-    }
-
-    // --- Feature string parsing ---
-
-    private fun parseFeature(string: String, style: Style = Style()): Feature? {
-        val parts = string.split(".")
-        val category = parts.firstOrNull() ?: return null
-
-        return when (category) {
-            "overlay" -> parseLandmarksGroup(parts.drop(1))?.let { Feature.Overlay(it, style) }
             "showPoints" -> Feature.ShowPoints(style)
-            "rangeOfMotion" -> parseRangeOfMotion(parts.drop(1))?.let { Feature.RangeOfMotion(it, style) }
-            "fitness" -> parseFitnessFeature(parts.drop(1))?.let { Feature.Fitness(it, style) }
+            "rangeOfMotion" -> romForMap(map)?.let { Feature.RangeOfMotion(it, style) }
+            "fitness" -> fitnessForMap(map)?.let { Feature.Fitness(it, style) }
+            "inside" -> {
+                val group = groupForName(map.str("group"), null) ?: Landmarks.Group.WholeBodyAndHead()
+                val insets = insetsForMap(map.map("edgeInsets"))
+                Feature.Inside(insets, group, style)
+            }
             else -> null
         }
     }
 
-    private fun parseLandmarksGroup(parts: List<String>): Landmarks.Group? {
-        val name = parts.firstOrNull() ?: return null
-        val side = if (parts.size > 1) parseSide(parts[1]) else null
+    // MARK: - Identifier → SDK enum lookups
 
+    private fun sideForName(name: String?): Side? {
+        return when (name) {
+            "left" -> Side.LEFT
+            "right" -> Side.RIGHT
+            else -> null
+        }
+    }
+
+    private fun groupForName(name: String?, side: Side?): Landmarks.Group? {
         return when (name) {
             "wholeBody" -> Landmarks.Group.WholeBody()
+            "wholeBodyAndHead" -> Landmarks.Group.WholeBodyAndHead()
             "upperBody" -> Landmarks.Group.UpperBody()
             "straightArmsUpperBody" -> Landmarks.Group.StraightArmsUpperBody()
             "toWristsUpperBody" -> Landmarks.Group.ToWristsUpperBody()
@@ -312,31 +277,33 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             "knees" -> Landmarks.Group.Knees()
             "legs" -> Landmarks.Group.Legs()
             "arms" -> Landmarks.Group.Arms()
+            "head" -> Landmarks.Group.Head()
             else -> null
         }
     }
 
-    private fun parseRangeOfMotion(parts: List<String>): RangeOfMotion? {
-        val name = parts.firstOrNull() ?: return null
-        val side = if (parts.size > 1) parseSide(parts[1]) else null
+    private fun romForMap(map: ReadableMap): RangeOfMotion? {
+        val joint = map.str("joint") ?: return null
+        val clockwise = map.bool("clockwise")
+        val side = sideForName(map.str("side"))
 
-        return when (name) {
-            "neck" -> RangeOfMotion.Neck(false)
-            "shoulder" -> RangeOfMotion.Shoulder(side ?: Side.LEFT, false)
-            "elbow" -> RangeOfMotion.Elbow(side ?: Side.LEFT, false)
-            "hip" -> RangeOfMotion.Hip(side ?: Side.LEFT, false)
-            "back" -> RangeOfMotion.Back(false)
-            "knee" -> RangeOfMotion.Knee(side ?: Side.LEFT, false)
-            "ankle" -> RangeOfMotion.Ankle(side ?: Side.LEFT, false)
+        return when (joint) {
+            "neck" -> RangeOfMotion.Neck(clockwise)
+            "shoulder" -> RangeOfMotion.Shoulder(side ?: Side.LEFT, clockwise)
+            "elbow" -> RangeOfMotion.Elbow(side ?: Side.LEFT, clockwise)
+            "hip" -> RangeOfMotion.Hip(side ?: Side.LEFT, clockwise)
+            "back" -> RangeOfMotion.Back(clockwise)
+            "knee" -> RangeOfMotion.Knee(side ?: Side.LEFT, clockwise)
+            "ankle" -> RangeOfMotion.Ankle(side ?: Side.LEFT, clockwise)
             else -> null
         }
     }
 
-    private fun parseFitnessFeature(parts: List<String>): FitnessFeature? {
-        val name = parts.firstOrNull() ?: return null
-        val side = if (parts.size > 1) parseSide(parts[1]) else null
+    private fun fitnessForMap(map: ReadableMap): FitnessFeature? {
+        val exercise = map.str("exercise") ?: return null
+        val side = sideForName(map.str("side"))
 
-        return when (name) {
+        return when (exercise) {
             "squats" -> FitnessFeature.Squats
             "pushUps" -> FitnessFeature.PushUps
             "jumpingJacks" -> FitnessFeature.JumpingJacks
@@ -360,11 +327,64 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
         }
     }
 
-    private fun parseSide(string: String): Side? {
-        return when (string) {
-            "left" -> Side.LEFT
-            "right" -> Side.RIGHT
-            else -> null
-        }
+    private fun insetsForMap(map: ReadableMap?): RelativeEdgeInsets {
+        if (map == null) return RelativeEdgeInsets(0.1f, 0.1f, 0.1f, 0.1f)
+        return RelativeEdgeInsets(
+            map.dbl("top", 0.1).toFloat(),
+            map.dbl("left", 0.1).toFloat(),
+            map.dbl("bottom", 0.1).toFloat(),
+            map.dbl("right", 0.1).toFloat()
+        )
     }
+
+    // MARK: - Style parsing
+
+    private fun parseStyleFromMap(map: ReadableMap): Style {
+        val color = map.str("color")?.let {
+            try { Color.valueOf(Color.parseColor(it)) } catch (e: Exception) { null }
+        } ?: Color.valueOf(Color.WHITE)
+
+        val relativeFontSize = map.dbl("relativeFontSize", 1.0).toFloat()
+        val relativeArcSize = map.dbl("relativeArcSize", 1.0).toFloat()
+        val relativeLineWidth = map.dbl("relativeLineWidth", 1.0).toFloat()
+        val cornerRadius = map.dbl("cornerRadius", 0.0).toFloat()
+
+        val conditionalColors = map.array("conditionalColors")?.let { arr ->
+            (0 until arr.size()).mapNotNull { i ->
+                val cc = arr.getMap(i) ?: return@mapNotNull null
+                val ccColor = cc.str("color")?.let {
+                    try { Color.valueOf(Color.parseColor(it)) } catch (e: Exception) { null }
+                } ?: return@mapNotNull null
+                val min = if (cc.hasKey("min") && !cc.isNull("min")) cc.getDouble("min").toFloat() else null
+                val max = if (cc.hasKey("max") && !cc.isNull("max")) cc.getDouble("max").toFloat() else null
+                Style.ConditionalColor(min, max, ccColor)
+            }
+        }
+
+        return Style(
+            relativeFontSize = relativeFontSize,
+            relativeArcSize = relativeArcSize,
+            relativeLineWidth = relativeLineWidth,
+            color = color,
+            cornerRadius = cornerRadius,
+            conditionalColors = conditionalColors
+        )
+    }
+
+    // MARK: - ReadableMap convenience
+
+    private fun ReadableMap.str(key: String): String? =
+        if (hasKey(key) && !isNull(key)) getString(key) else null
+
+    private fun ReadableMap.dbl(key: String, default: Double): Double =
+        if (hasKey(key) && !isNull(key)) getDouble(key) else default
+
+    private fun ReadableMap.bool(key: String): Boolean =
+        hasKey(key) && !isNull(key) && getBoolean(key)
+
+    private fun ReadableMap.map(key: String): ReadableMap? =
+        if (hasKey(key) && !isNull(key)) getMap(key) else null
+
+    private fun ReadableMap.array(key: String): ReadableArray? =
+        if (hasKey(key) && !isNull(key)) getArray(key) else null
 }

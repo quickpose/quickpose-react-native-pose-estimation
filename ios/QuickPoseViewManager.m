@@ -5,7 +5,6 @@
 RCT_EXPORT_VIEW_PROPERTY(onUpdate, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(sdkKey, NSString)
 RCT_EXPORT_VIEW_PROPERTY(features, NSArray)
-RCT_EXPORT_VIEW_PROPERTY(stylesJson, NSString)
 RCT_EXPORT_VIEW_PROPERTY(useFrontCamera, BOOL)
 
 @end
