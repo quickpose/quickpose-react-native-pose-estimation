@@ -20,7 +20,9 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - run: npm install -g npm@latest
+      # Pin npm — v11.12.1 (current @latest) ships broken with a missing
+      # promise-retry dependency. v11 is required for OIDC trusted publishing.
+      - run: npm install -g npm@11.11.1
 
       - run: npm install
 
