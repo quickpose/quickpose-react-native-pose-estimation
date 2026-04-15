@@ -81,3 +81,24 @@ export interface QuickPoseViewProps {
   style?: StyleProp<ViewStyle>;
   onUpdate?: (event: QuickPoseUpdateEvent) => void;
 }
+
+/**
+ * Imperative handle returned by `useRef<QuickPoseViewRef>()` when attached to
+ * a `<QuickPoseView ref={...} />`. Lets you grab the current composite camera +
+ * overlay frame on demand.
+ */
+export interface QuickPoseViewRef {
+  /**
+   * Capture the current camera + overlay frame as a PNG and return a
+   * platform-local URI (`file://` on iOS, `content://` on Android) to the
+   * written file. Read bytes via `await (await fetch(uri)).arrayBuffer()`.
+   */
+  captureFrame(): Promise<string>;
+
+  /**
+   * Capture the current frame and open the OS share sheet. Resolves once the
+   * sheet is presented; the user's choice (sharing to an app / cancelling) is
+   * handled by the OS.
+   */
+  shareFrame(title?: string): Promise<void>;
+}

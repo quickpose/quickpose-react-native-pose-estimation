@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   Linking,
 } from 'react-native';
-import {QuickPoseView} from '@quickpose/react-native';
+import {QuickPoseView, QuickPoseViewRef} from '@quickpose/react-native';
 import {QUICKPOSE_SDK_KEY} from './sdkConfig';
 
 const FEATURE_CATEGORIES: Record<string, {label: string; feature: string}[]> = {
@@ -69,6 +69,7 @@ const FEATURE_CATEGORIES: Record<string, {label: string; feature: string}[]> = {
 const CATEGORY_NAMES = Object.keys(FEATURE_CATEGORIES);
 
 const App = () => {
+  const poseRef = useRef<QuickPoseViewRef>(null);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_NAMES[0]);
   const [selectedFeatureIdx, setSelectedFeatureIdx] = useState(0);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -127,6 +128,7 @@ const App = () => {
   return (
     <View style={styles.container}>
       <QuickPoseView
+        ref={poseRef}
         sdkKey={QUICKPOSE_SDK_KEY}
         features={[currentFeature.feature]}
         useFrontCamera={true}
@@ -186,6 +188,17 @@ const App = () => {
       )}
 
       <SafeAreaView style={styles.bottomBranding}>
+        <TouchableOpacity
+          style={styles.shareButton}
+          onPress={async () => {
+            try {
+              await poseRef.current?.shareFrame(currentFeature.label);
+            } catch (e) {
+              console.warn('shareFrame failed', e);
+            }
+          }}>
+          <Text style={styles.shareLabel}>Share Screenshot</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL('https://quickpose.ai')}>
           <Text style={styles.brandingText}>Powered by QuickPose.ai</Text>
         </TouchableOpacity>
@@ -391,6 +404,18 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     fontSize: 12,
     fontWeight: '500',
+  },
+  shareButton: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 22,
+    marginBottom: 8,
+  },
+  shareLabel: {
+    color: '#111',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

@@ -2,11 +2,20 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.2] - 2026-04-15
+
+### Added
+- `captureFrame()` and `shareFrame(title?)` imperative methods on `QuickPoseView` via ref. `captureFrame()` returns a platform-local URI (`file://` iOS, `content://` Android) to a PNG of the current camera + overlay composite. `shareFrame()` opens the native share sheet in one call. The `example/` app now includes a "Share Screenshot" button.
+- `QuickPoseViewRef` type exported for `useRef<QuickPoseViewRef>(null)`.
+
+### Fixed
+- Android camera preview is composited with the overlay on a single `SurfaceView`, so `react-native-view-shot` can't capture it. The new native path uses `PixelCopy` + a plugin-scoped `FileProvider`, so apps on Expo / bare RN can share screenshots without a third-party dep.
+
 ## [0.3.1] - 2026-04-15
 
 ### Added
 - `QuickPoseThresholdCounter` and `FixedSizeRingBuffer` — JS utilities ported 1:1 from the iOS / Android SDKs so sample code reads the same across platforms.
-- New `example-gated-fitness/` sample app demonstrating pose-gated rep counting: counting is paused while the SDK emits pose-check feedback (user not yet in position), so false reps during setup are avoided. Includes a live horizontal progress bar of the fitness measure.
+- New `example-counter/` sample app demonstrating pose-gated rep counting: counting is paused while the SDK emits pose-check feedback (user not yet in position), so false reps during setup are avoided. Includes a live horizontal progress bar of the fitness measure.
 
 ## [0.3.0] - 2026-04-15
 

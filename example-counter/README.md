@@ -1,4 +1,4 @@
-# example-gated-fitness
+# example-counter
 
 Minimal sample showing how to gate rep counting on the SDK's pose-check
 feedback — so counting only starts once the user is in the correct starting

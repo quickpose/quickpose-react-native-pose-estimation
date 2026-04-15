@@ -48,6 +48,21 @@ class QuickPoseView: UIView {
   // Feature keys from JS, kept in order for result correlation
   private var currentFeatureKeys: [String] = []
 
+  // Registry so QuickPoseCaptureModule can find the view by reactTag on
+  // both Paper and Fabric — Fabric's UIManager doesn't expose view registry.
+  static var registry: [Int: QuickPoseView] = [:]
+
+  override var reactTag: NSNumber! {
+    didSet {
+      if let old = oldValue?.intValue { QuickPoseView.registry.removeValue(forKey: old) }
+      if let tag = reactTag?.intValue { QuickPoseView.registry[tag] = self }
+    }
+  }
+
+  deinit {
+    if let tag = reactTag?.intValue { QuickPoseView.registry.removeValue(forKey: tag) }
+  }
+
   override init(frame: CGRect) {
     super.init(frame: frame)
   }
@@ -250,7 +265,12 @@ class QuickPoseView: UIView {
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
     currentFeatureKeys = keyedFeatures.map { $0.0 }
-    qp.update(features: keyedFeatures.map { $0.1 })
+    qp.update(features: keyedFeatures.map { $0.1 } + [.overlayHasCameraAsBackground(darkenCamera: 0)])
+  }
+
+  // Latest composited camera+overlay UIImage, read by QuickPoseCaptureModule.
+  var latestFrameImage: UIImage? {
+    return overlayState.image
   }
 
   private func tryStart() {
@@ -263,7 +283,11 @@ class QuickPoseView: UIView {
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
     currentFeatureKeys = keyedFeatures.map { $0.0 }
-    let parsedFeatures = keyedFeatures.map { $0.1 }
+    // Append camera-as-background so the onFrame UIImage delivered to
+    // overlayState is a composite camera+overlay frame. This makes
+    // captureFrame() return a composited PNG without the customer
+    // having to request the feature explicitly.
+    let parsedFeatures = keyedFeatures.map { $0.1 } + [.overlayHasCameraAsBackground(darkenCamera: 0)]
 
     let wrapperView = QuickPoseCameraWrapperView(
       quickPose: qp,

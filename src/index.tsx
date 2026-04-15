@@ -1,49 +1,78 @@
 import React from 'react';
-import type { QuickPoseViewProps, QuickPoseUpdateEvent } from './types';
+import {NativeModules, findNodeHandle} from 'react-native';
+import type {QuickPoseViewProps, QuickPoseViewRef} from './types';
 import NativeQuickPoseView from './QuickPoseViewNativeComponent';
-import { parseFeatureString } from './parseFeature';
+import {parseFeatureString} from './parseFeature';
 
-export const QuickPoseView: React.FC<QuickPoseViewProps> = ({
-  sdkKey,
-  features,
-  featureStyles,
-  useFrontCamera = true,
-  style,
-  onUpdate,
-}) => {
-  const handleUpdate = (event: any) => {
-    const {resultsJson, feedback} = event.nativeEvent;
-    const results = resultsJson ? JSON.parse(resultsJson) : [];
-    onUpdate?.({
-      nativeEvent: {
-        results,
-        feedback: feedback || null,
-      },
-    });
-  };
+const {QuickPoseCaptureModule} = NativeModules;
 
-  const parsedFeatures = React.useMemo(() => {
-    return features
-      .map(f => parseFeatureString(f, featureStyles?.[f]))
-      .filter((f): f is NonNullable<typeof f> => f !== null);
-  }, [features, featureStyles]);
+export const QuickPoseView = React.forwardRef<QuickPoseViewRef, QuickPoseViewProps>(
+  ({sdkKey, features, featureStyles, useFrontCamera = true, style, onUpdate}, ref) => {
+    const nativeRef = React.useRef<React.ElementRef<typeof NativeQuickPoseView>>(null);
 
-  return (
-    <NativeQuickPoseView
-      sdkKey={sdkKey}
-      features={parsedFeatures}
-      useFrontCamera={useFrontCamera}
-      style={style}
-      onUpdate={handleUpdate}
-    />
-  );
-};
+    const handleUpdate = (event: any) => {
+      const {resultsJson, feedback} = event.nativeEvent;
+      const results = resultsJson ? JSON.parse(resultsJson) : [];
+      onUpdate?.({
+        nativeEvent: {
+          results,
+          feedback: feedback || null,
+        },
+      });
+    };
 
-export { QuickPoseThresholdCounter } from './QuickPoseThresholdCounter';
-export type { CountState } from './QuickPoseThresholdCounter';
-export { FixedSizeRingBuffer } from './FixedSizeRingBuffer';
+    const parsedFeatures = React.useMemo(() => {
+      return features
+        .map(f => parseFeatureString(f, featureStyles?.[f]))
+        .filter((f): f is NonNullable<typeof f> => f !== null);
+    }, [features, featureStyles]);
+
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        async captureFrame() {
+          const tag = findNodeHandle(nativeRef.current);
+          if (tag == null) throw new Error('QuickPoseView is not mounted');
+          if (!QuickPoseCaptureModule) {
+            throw new Error(
+              'QuickPoseCaptureModule is not available. Re-run pod install on iOS or rebuild on Android.',
+            );
+          }
+          return await QuickPoseCaptureModule.captureFrame(tag);
+        },
+        async shareFrame(title?: string) {
+          const tag = findNodeHandle(nativeRef.current);
+          if (tag == null) throw new Error('QuickPoseView is not mounted');
+          if (!QuickPoseCaptureModule) {
+            throw new Error(
+              'QuickPoseCaptureModule is not available. Re-run pod install on iOS or rebuild on Android.',
+            );
+          }
+          await QuickPoseCaptureModule.shareFrame(tag, title ?? null);
+        },
+      }),
+      [],
+    );
+
+    return (
+      <NativeQuickPoseView
+        ref={nativeRef}
+        sdkKey={sdkKey}
+        features={parsedFeatures}
+        useFrontCamera={useFrontCamera}
+        style={style}
+        onUpdate={handleUpdate}
+      />
+    );
+  },
+);
+
+export {QuickPoseThresholdCounter} from './QuickPoseThresholdCounter';
+export type {CountState} from './QuickPoseThresholdCounter';
+export {FixedSizeRingBuffer} from './FixedSizeRingBuffer';
 export type {
   QuickPoseViewProps,
+  QuickPoseViewRef,
   QuickPoseUpdateEvent,
   QuickPoseResult,
   QuickPoseStyle,
