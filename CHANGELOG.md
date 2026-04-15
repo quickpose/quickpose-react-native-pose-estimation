@@ -6,7 +6,7 @@ All notable changes to `@quickpose/react-native` will be documented in this file
 
 ### Added
 - `QuickPoseThresholdCounter` and `FixedSizeRingBuffer` — JS utilities ported 1:1 from the iOS / Android SDKs so sample code reads the same across platforms.
-- `example-gated-fitness` sample app demonstrating pose-gated rep counting with a live measure progress bar.
+- New `example-gated-fitness/` sample app demonstrating pose-gated rep counting: counting is paused while the SDK emits pose-check feedback (user not yet in position), so false reps during setup are avoided. Includes a live horizontal progress bar of the fitness measure.
 
 ## [0.3.0] - 2026-04-15
 
