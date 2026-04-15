@@ -137,15 +137,21 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
         val height = view.height
         if (width == 0 || height == 0) return
 
+        // Pass AT_MOST to both axes so QuickPoseCameraView.onMeasure() can
+        // pick its own cover-fit size (it returns >= parent on whichever
+        // axis needs cropping). Then lay the child out at its chosen size,
+        // centred — the parent FrameLayout clips the overflow.
         for (i in 0 until view.childCount) {
             val child = view.getChildAt(i)
             child.measure(
-                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST),
                 View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.AT_MOST)
             )
-            val childHeight = child.measuredHeight
+            val childWidth = child.measuredWidth.coerceAtLeast(width)
+            val childHeight = child.measuredHeight.coerceAtLeast(height)
+            val left = (width - childWidth) / 2
             val top = (height - childHeight) / 2
-            child.layout(0, top, width, top + childHeight)
+            child.layout(left, top, left + childWidth, top + childHeight)
         }
     }
 
@@ -168,7 +174,8 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             csvView,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.CENTER
             )
         )
 

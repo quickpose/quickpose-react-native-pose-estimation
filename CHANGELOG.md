@@ -2,6 +2,19 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.1] - 2026-04-15
+
+### Added
+- `QuickPoseThresholdCounter` utility — 1:1 port of the iOS / Android SDK helper. Two-threshold hysteresis rep counter (enter 0.6, exit 0.3) that customers can import and use alongside the `onUpdate` callback, matching iOS / Android sample code.
+- `FixedSizeRingBuffer<T>` utility — 1:1 port of the SDK helper. Useful for timer-style exercises (plank holds).
+- New `example-gated-fitness/` sample app demonstrating pose-gated rep counting: counting is paused while the SDK emits pose-check feedback (user not yet in position), so false reps during setup are avoided. Includes a live horizontal progress bar of the fitness measure.
+
+### Fixed
+- Android camera view was stretched vertically by ~13% on portrait devices. The RN view manager's manual layout now honours the child's measured cover-size and centre-crops any overflow, matching the native `composeapp` sample behaviour.
+
+### Removed
+- `parseFeatureString` is no longer exported. It was internal plumbing exposed by mistake in 0.3.0.
+
 ## [0.3.0] - 2026-04-15
 
 ### Added

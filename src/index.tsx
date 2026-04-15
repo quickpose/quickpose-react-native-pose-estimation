@@ -39,7 +39,9 @@ export const QuickPoseView: React.FC<QuickPoseViewProps> = ({
   );
 };
 
-export { parseFeatureString } from './parseFeature';
+export { QuickPoseThresholdCounter } from './QuickPoseThresholdCounter';
+export type { CountState } from './QuickPoseThresholdCounter';
+export { FixedSizeRingBuffer } from './FixedSizeRingBuffer';
 export type {
   QuickPoseViewProps,
   QuickPoseUpdateEvent,

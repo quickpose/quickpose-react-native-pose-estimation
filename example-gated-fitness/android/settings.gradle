@@ -1,0 +1,10 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'QuickPoseExample'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
+
+// Include the plugin's android module
+include ':quickpose-react-native'
+project(':quickpose-react-native').projectDir = new File(rootProject.projectDir, '../../android')
