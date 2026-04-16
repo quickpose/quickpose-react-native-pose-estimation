@@ -2,6 +2,11 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.3] - 2026-04-16
+
+### Fixed
+- Android autolinking in Expo projects. Previously caused *"Can't find view manager QuickPoseView"* at runtime; no manual `MainApplication.kt` registration needed anymore.
+
 ## [0.3.2] - 2026-04-15
 
 ### Added
