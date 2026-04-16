@@ -2,6 +2,11 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.6] - 2026-04-16
+
+### Fixed
+- Android `captureFrame()` stretching when the Surface buffer aspect differed from the view. Now uses Window-based `PixelCopy` to capture the composited displayed content, which handles rotation and scaling consistently.
+
 ## [0.3.5] - 2026-04-16
 
 ### Fixed
