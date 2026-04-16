@@ -2,6 +2,11 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.5] - 2026-04-16
+
+### Fixed
+- Android `captureFrame()` orientation — camera buffer is now rotated to match the display orientation (portrait apps no longer get sideways captures).
+
 ## [0.3.4] - 2026-04-16
 
 ### Fixed
