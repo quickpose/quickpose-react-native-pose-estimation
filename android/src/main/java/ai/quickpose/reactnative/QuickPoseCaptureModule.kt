@@ -2,11 +2,10 @@ package ai.quickpose.reactnative
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Matrix
+import android.graphics.Rect
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.PixelCopy
-import android.view.Surface
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
@@ -70,51 +69,41 @@ class QuickPoseCaptureModule(context: ReactApplicationContext) : ReactContextBas
                     ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("Could not resolve view $viewTag")))
                 val surfaceView = findSurfaceView(view)
                     ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("No SurfaceView under QuickPoseView")))
-                // Size the destination bitmap to the Surface's native buffer, NOT
-                // the view bounds. The camera preview renders at its own resolution
-                // (often landscape 720p/1080p) into a SurfaceView stretched to fit
-                // the screen. Sizing the bitmap to view dimensions leaves the
-                // area outside the buffer rect unfilled — which stays transparent
-                // on ARGB_8888 — producing a cropped-top composite.
-                val surfaceRect = surfaceView.holder.surfaceFrame
-                val width = surfaceRect.width().takeIf { it > 0 } ?: surfaceView.width
-                val height = surfaceRect.height().takeIf { it > 0 } ?: surfaceView.height
+                val width = surfaceView.width
+                val height = surfaceView.height
                 if (width == 0 || height == 0) {
                     return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("Surface has zero size")))
                 }
+                // Capture the composited Window content at the view's screen rect
+                // instead of reading the source Surface buffer directly. PixelCopy
+                // on a SurfaceView reads the producer buffer as-is — CameraX writes
+                // at the camera's native sensor resolution (landscape 1920x1080),
+                // and a post-rotation won't help when the buffer aspect doesn't
+                // match the dest bitmap (PixelCopy stretches the source to fit).
+                // The Window overload captures what is actually displayed: all
+                // view transforms, orientation changes, and overlays already
+                // applied by the compositor. (API 26+, which this package targets.)
+                val activity = ctx.currentActivity
+                    ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("No current Activity for Window capture")))
+                val window = activity.window
+                    ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("Activity has no Window")))
+                val location = IntArray(2)
+                surfaceView.getLocationInWindow(location)
+                val srcRect = Rect(location[0], location[1], location[0] + width, location[1] + height)
                 val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 val thread = HandlerThread("QuickPoseCapture")
                 thread.start()
                 val handler = Handler(thread.looper)
-                // Camera sensor buffer is always in its native orientation
-                // (typically landscape). The screen preview is rotated by the
-                // compositor based on the window rotation, but PixelCopy reads
-                // the raw surface buffer — so we apply the matching rotation
-                // here to match what the user sees on screen.
-                val rotationDegrees = when (surfaceView.display?.rotation ?: Surface.ROTATION_0) {
-                    Surface.ROTATION_0 -> 90
-                    Surface.ROTATION_90 -> 0
-                    Surface.ROTATION_180 -> 270
-                    Surface.ROTATION_270 -> 180
-                    else -> 0
-                }
-                PixelCopy.request(surfaceView, bitmap, { copyResult ->
+                PixelCopy.request(window, srcRect, bitmap, { copyResult ->
                     try {
                         if (copyResult != PixelCopy.SUCCESS) {
                             onDone(Result.failure(IllegalStateException("PixelCopy failed with $copyResult")))
                             return@request
                         }
-                        val output = if (rotationDegrees != 0) {
-                            val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
-                            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-                        } else {
-                            bitmap
-                        }
                         val file = File(ctx.cacheDir, "quickpose_${System.currentTimeMillis()}.png")
                         FileOutputStream(file).use { out ->
-                            output.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                         }
-                        if (output !== bitmap) output.recycle()
                         onDone(Result.success(file))
                     } catch (e: Exception) {
                         onDone(Result.failure(e))
