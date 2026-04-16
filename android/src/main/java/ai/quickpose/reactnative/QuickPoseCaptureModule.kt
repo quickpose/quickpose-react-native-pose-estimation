@@ -68,8 +68,15 @@ class QuickPoseCaptureModule(context: ReactApplicationContext) : ReactContextBas
                     ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("Could not resolve view $viewTag")))
                 val surfaceView = findSurfaceView(view)
                     ?: return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("No SurfaceView under QuickPoseView")))
-                val width = surfaceView.width
-                val height = surfaceView.height
+                // Size the destination bitmap to the Surface's native buffer, NOT
+                // the view bounds. The camera preview renders at its own resolution
+                // (often landscape 720p/1080p) into a SurfaceView stretched to fit
+                // the screen. Sizing the bitmap to view dimensions leaves the
+                // area outside the buffer rect unfilled — which stays transparent
+                // on ARGB_8888 — producing a cropped-top composite.
+                val surfaceRect = surfaceView.holder.surfaceFrame
+                val width = surfaceRect.width().takeIf { it > 0 } ?: surfaceView.width
+                val height = surfaceRect.height().takeIf { it > 0 } ?: surfaceView.height
                 if (width == 0 || height == 0) {
                     return@runOnUiQueueThread onDone(Result.failure(IllegalStateException("Surface has zero size")))
                 }
