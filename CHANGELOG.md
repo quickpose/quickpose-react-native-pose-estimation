@@ -5,7 +5,7 @@ All notable changes to `@quickpose/react-native` will be documented in this file
 ## [0.3.4] - 2026-04-16
 
 ### Fixed
-- Android `captureFrame()` produced a cropped image with transparent filler — the destination bitmap was sized to the view bounds but PixelCopy only writes the source surface's buffer rect. Now sizes the bitmap to the Surface's native dimensions.
+- Android `captureFrame()` cropping — bitmap now sized to the Surface's buffer, not the view bounds.
 
 ## [0.3.3] - 2026-04-16
 
