@@ -2,6 +2,11 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.3.7] - 2026-04-16
+
+### Fixed
+- Android `captureFrame()` now forces a landscape dest bitmap matching the camera's native buffer aspect, preventing the PixelCopy stretch that distorted 0.3.4/0.3.5 captures. Result is then rotated to display orientation.
+
 ## [0.3.6] - 2026-04-16
 
 ### Fixed
