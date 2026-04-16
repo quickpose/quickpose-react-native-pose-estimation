@@ -2,9 +2,11 @@ package ai.quickpose.reactnative
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.PixelCopy
+import android.view.Surface
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
@@ -84,16 +86,35 @@ class QuickPoseCaptureModule(context: ReactApplicationContext) : ReactContextBas
                 val thread = HandlerThread("QuickPoseCapture")
                 thread.start()
                 val handler = Handler(thread.looper)
+                // Camera sensor buffer is always in its native orientation
+                // (typically landscape). The screen preview is rotated by the
+                // compositor based on the window rotation, but PixelCopy reads
+                // the raw surface buffer — so we apply the matching rotation
+                // here to match what the user sees on screen.
+                val rotationDegrees = when (surfaceView.display?.rotation ?: Surface.ROTATION_0) {
+                    Surface.ROTATION_0 -> 90
+                    Surface.ROTATION_90 -> 0
+                    Surface.ROTATION_180 -> 270
+                    Surface.ROTATION_270 -> 180
+                    else -> 0
+                }
                 PixelCopy.request(surfaceView, bitmap, { copyResult ->
                     try {
                         if (copyResult != PixelCopy.SUCCESS) {
                             onDone(Result.failure(IllegalStateException("PixelCopy failed with $copyResult")))
                             return@request
                         }
+                        val output = if (rotationDegrees != 0) {
+                            val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                        } else {
+                            bitmap
+                        }
                         val file = File(ctx.cacheDir, "quickpose_${System.currentTimeMillis()}.png")
                         FileOutputStream(file).use { out ->
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                            output.compress(Bitmap.CompressFormat.PNG, 100, out)
                         }
+                        if (output !== bitmap) output.recycle()
                         onDone(Result.success(file))
                     } catch (e: Exception) {
                         onDone(Result.failure(e))
