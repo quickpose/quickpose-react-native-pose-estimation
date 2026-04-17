@@ -82,6 +82,9 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     @ReactProp(name = "useFrontCamera", defaultBoolean = true)
     fun setUseFrontCamera(view: FrameLayout, front: Boolean) {
         useFrontCamera = front
+        // Stash on the view so QuickPoseCaptureModule can query which physical
+        // camera is active (needed for SENSOR_ORIENTATION + mirror logic).
+        view.setTag(QuickPoseCaptureModule.TAG_USE_FRONT_CAMERA, front)
         tryStart(view)
     }
 
@@ -189,7 +192,10 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             csvView.start(useFrontCamera)
             qp.start(
                 features,
-                onFrame = { status, _, featureResults, feedback, _ ->
+                onFrame = { status, overlay, featureResults, feedback, _ ->
+                    // Store overlay + camera refs on the container view for QuickPoseCaptureModule
+                    view.setTag(QuickPoseCaptureModule.TAG_OVERLAY_SURFACE, overlay)
+                    view.setTag(QuickPoseCaptureModule.TAG_CAMERA_SWITCH_VIEW, csvView)
                     if (status is Status.Success) {
                         val jsonArray = JSONArray()
                         val featureKeys = currentFeatureKeys

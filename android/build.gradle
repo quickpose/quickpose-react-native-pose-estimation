@@ -48,7 +48,7 @@ dependencies {
 
     // QuickPose SDK
     implementation "ai.quickpose:quickpose-mp:0.6"
-    implementation "ai.quickpose:quickpose-core:0.19"
+    implementation "ai.quickpose:quickpose-core:0.20"
 
     // CameraX
     def camerax_version = "1.3.4"
