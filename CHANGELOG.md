@@ -2,6 +2,12 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.4.1] - 2026-04-17
+
+### Changed
+- Android `captureFrame()` uses `QuickPoseCameraSwitchView.captureFrame()` from core 0.21. No companion statics or view tags — resolves the switch view from the view hierarchy and calls it directly.
+- Bumped `ai.quickpose:quickpose-core` from 0.20 to 0.21.
+
 ## [0.4.0] - 2026-04-17
 
 ### Changed
