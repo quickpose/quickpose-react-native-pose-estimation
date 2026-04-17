@@ -2,6 +2,14 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.4.0] - 2026-04-17
+
+### Changed
+- Android `captureFrame()` now uses `QuickPose.captureFrame()` from core 0.20 — composites camera + overlay SurfaceViews via PixelCopy + Canvas. Fixes orientation, stretching, and missing overlay issues from 0.3.x.
+- Android output format changed from PNG to JPEG.
+- Bumped `ai.quickpose:quickpose-core` from 0.19 to 0.20.
+- Removed `androidx.exifinterface` dependency (no longer needed).
+
 ## [0.3.7] - 2026-04-16
 
 ### Fixed
