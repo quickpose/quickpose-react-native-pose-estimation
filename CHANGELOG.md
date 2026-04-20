@@ -2,6 +2,18 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.5.1] - 2026-04-20
+
+### Changed
+- `onUpdate` event now exposes results and feedback as feature-keyed maps, matching the native iOS/Android SDK shape.
+  - `nativeEvent.results`: `Record<featureKey, number>` (was `Array<{feature, value}>`).
+  - `nativeEvent.feedbacks`: `Record<featureKey, string>` (new — replaces the flattened `feedback: string`). Only non-empty feedback entries are included.
+- `example-counter` now subscribes to `inside.wholeBody` (red/green bounding box) and demonstrates selective gating: counting is blocked only by `feedbacks['fitness.pushUps']`, while `inside.wholeBody` feedback is informational. Before this change, any feedback source (including `inside`) paused counting, which caused rep resets as the user drifted near the frame edge.
+
+### Type changes
+- Removed: `QuickPoseResult` (array-element type).
+- Added: `QuickPoseResults`, `QuickPoseFeedbacks` (keyed record types).
+
 ## [0.5.0] - 2026-04-20
 
 ### Added

@@ -46,7 +46,8 @@ class QuickPoseView: UIView {
   private var overlayState = OverlayState()
   private var hasStarted = false
   // Feature keys from JS, kept in order for result correlation
-  private var currentFeatureKeys: [String] = []
+  private var currentFeatures: [(String, QuickPose.Feature)] = []
+  private var currentFeatureKeys: [String] { currentFeatures.map { $0.0 } }
 
   // Registry so QuickPoseCaptureModule can find the view by reactTag on
   // both Paper and Fabric — Fabric's UIManager doesn't expose view registry.
@@ -264,7 +265,7 @@ class QuickPoseView: UIView {
     }
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
-    currentFeatureKeys = keyedFeatures.map { $0.0 }
+    currentFeatures = keyedFeatures
     qp.update(features: keyedFeatures.map { $0.1 })
   }
 
@@ -289,7 +290,7 @@ class QuickPoseView: UIView {
 
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
-    currentFeatureKeys = keyedFeatures.map { $0.0 }
+    currentFeatures = keyedFeatures
     let parsedFeatures = keyedFeatures.map { $0.1 }
 
     let wrapperView = QuickPoseCameraWrapperView(
@@ -322,19 +323,19 @@ class QuickPoseView: UIView {
       }
       if case .success = status {
         guard let self = self, let onUpdate = self.onUpdate else { return }
-        let featureKeys = self.currentFeatureKeys
-        var results: [(String, Double)] = []
-        for (i, featureKey) in featureKeys.enumerated() {
-          if i < featureResults.count {
-            let entry = featureResults[featureResults.index(featureResults.startIndex, offsetBy: i)]
-            results.append((featureKey, entry.value.value))
+        var results: [String: Double] = [:]
+        var feedbacks: [String: String] = [:]
+        for (featureKey, feature) in self.currentFeatures {
+          if let result = featureResults[feature] {
+            results[featureKey] = result.value
+          }
+          if let fb = feedback[feature]?.displayString, !fb.isEmpty {
+            feedbacks[featureKey] = fb
           }
         }
-        let resultArray = results.map { ["feature": $0.0, "value": $0.1] as [String: Any] }
-        let jsonData = (try? JSONSerialization.data(withJSONObject: resultArray)) ?? Data()
-        let resultsJson = String(data: jsonData, encoding: .utf8) ?? "[]"
-        let feedbackText = feedback.values.first?.displayString ?? ""
-        onUpdate(["resultsJson": resultsJson, "feedback": feedbackText, "fps": fps])
+        let resultsJson = (try? JSONSerialization.data(withJSONObject: results)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        let feedbacksJson = (try? JSONSerialization.data(withJSONObject: feedbacks)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        onUpdate(["resultsJson": resultsJson, "feedbacksJson": feedbacksJson, "fps": fps])
       }
     })
   }

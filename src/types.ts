@@ -36,15 +36,14 @@ export interface ParsedFeature {
 
 // --- Public API types ---
 
-export interface QuickPoseResult {
-  feature: string;
-  value: number;
-}
+export type QuickPoseResults = Record<string, number>;
+export type QuickPoseFeedbacks = Record<string, string>;
 
 export interface QuickPoseUpdateEvent {
   nativeEvent: {
-    results: QuickPoseResult[];
-    feedback: string | null;
+    results: QuickPoseResults;
+    feedbacks: QuickPoseFeedbacks;
+    fps: number;
   };
 }
 

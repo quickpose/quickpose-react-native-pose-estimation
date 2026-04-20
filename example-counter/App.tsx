@@ -16,7 +16,16 @@ import {
 import {QUICKPOSE_SDK_KEY} from './sdkConfig';
 
 const EXERCISE = 'fitness.pushUps';
-const FEATURES = [EXERCISE, 'overlay.wholeBody'];
+const FEATURES = [EXERCISE, 'overlay.wholeBody', 'inside.wholeBody'];
+const FEATURE_STYLES = {
+  'inside.wholeBody': {
+    edgeInsets: {top: 0.05, left: 0.05, bottom: 0.05, right: 0.05},
+    relativeLineWidth: 2.0,
+    cornerRadius: 16,
+    color: '#EF4444',
+    conditionalColors: [{min: 0.95, color: '#22C55E'}],
+  },
+};
 
 const App = () => {
   const quickposeRef = useRef<QuickPoseViewRef>(null);
@@ -29,15 +38,19 @@ const App = () => {
   const [capturing, setCapturing] = useState(false);
 
   const handleUpdate = useCallback((event: any) => {
-    const {results, feedback: fb, fps: newFps} = event.nativeEvent;
-    const prompt = fb && fb.length > 0 ? fb : null;
+    const {results, feedbacks, fps: newFps} = event.nativeEvent;
+    // Gate counting on the exercise's own feedback only, not inside.wholeBody —
+    // so the red/green box doesn't flap the counter as the user drifts near
+    // the edge of frame.
+    const formFeedback = feedbacks?.[EXERCISE];
+    const prompt = formFeedback || feedbacks?.['inside.wholeBody'] || null;
     setFeedback(prompt);
     if (typeof newFps === 'number') setFps(newFps);
 
-    const v = results?.find((r: any) => r.feature === EXERCISE)?.value;
+    const v = results?.[EXERCISE];
     if (typeof v === 'number') {
       setMeasure(v);
-      if (prompt === null) {
+      if (!formFeedback) {
         const state = counter.current.count(v);
         setCount(state.count);
       }
@@ -63,6 +76,7 @@ const App = () => {
         ref={quickposeRef}
         sdkKey={QUICKPOSE_SDK_KEY}
         features={FEATURES}
+        featureStyles={FEATURE_STYLES}
         useFrontCamera={true}
         style={styles.camera}
         onUpdate={handleUpdate}

@@ -4,7 +4,6 @@ import ai.quickpose.camera.QuickPoseCameraSwitchView
 import ai.quickpose.core.*
 import android.Manifest
 import android.graphics.Color
-import org.json.JSONArray
 import org.json.JSONObject
 import android.content.pm.PackageManager
 import android.view.Choreographer
@@ -37,7 +36,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     private var featureMaps: List<ReadableMap> = emptyList()
     private var useFrontCamera: Boolean = true
     private var hasStarted = false
-    private var currentFeatureKeys: List<String> = emptyList()
+    private var currentFeatures: List<Pair<String, Feature>> = emptyList()
 
     override fun getName(): String = REACT_CLASS
 
@@ -71,7 +70,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
         if (hasStarted) {
             val keyed = mapFeatures()
             if (keyed.isNotEmpty()) {
-                currentFeatureKeys = keyed.map { it.first }
+                currentFeatures = keyed
                 quickPose?.update(keyed.map { it.second }.toTypedArray())
             }
         } else {
@@ -191,21 +190,20 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
                 features,
                 onFrame = { status, _, featureResults, feedback, _ ->
                     if (status is Status.Success) {
-                        val jsonArray = JSONArray()
-                        val featureKeys = currentFeatureKeys
-                        val entries = featureResults.entries.toList()
-                        for ((i, featureKey) in featureKeys.withIndex()) {
-                            if (i < entries.size) {
-                                val obj = JSONObject()
-                                obj.put("feature", featureKey)
-                                obj.put("value", entries[i].value.value.toDouble())
-                                jsonArray.put(obj)
+                        val resultsJson = JSONObject()
+                        val feedbacksJson = JSONObject()
+                        for ((featureKey, feature) in currentFeatures) {
+                            featureResults[feature]?.let { result ->
+                                resultsJson.put(featureKey, result.value.toDouble())
+                            }
+                            val fb = feedback?.get(feature)?.displayString
+                            if (!fb.isNullOrEmpty()) {
+                                feedbacksJson.put(featureKey, fb)
                             }
                         }
-                        val feedbackText = feedback?.values?.firstOrNull()?.displayString ?: ""
                         val event = Arguments.createMap().apply {
-                            putString("resultsJson", jsonArray.toString())
-                            putString("feedback", feedbackText)
+                            putString("resultsJson", resultsJson.toString())
+                            putString("feedbacksJson", feedbacksJson.toString())
                             putInt("fps", status.fps)
                         }
                         reactContext
