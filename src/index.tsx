@@ -11,12 +11,13 @@ export const QuickPoseView = React.forwardRef<QuickPoseViewRef, QuickPoseViewPro
     const nativeRef = React.useRef<React.ElementRef<typeof NativeQuickPoseView>>(null);
 
     const handleUpdate = (event: any) => {
-      const {resultsJson, feedback} = event.nativeEvent;
+      const {resultsJson, feedback, fps} = event.nativeEvent;
       const results = resultsJson ? JSON.parse(resultsJson) : [];
       onUpdate?.({
         nativeEvent: {
           results,
           feedback: feedback || null,
+          fps: typeof fps === 'number' ? fps : 0,
         },
       });
     };

@@ -16,11 +16,21 @@ class QuickPoseCaptureModule: NSObject {
                     resolver resolve: @escaping RCTPromiseResolveBlock,
                     rejecter reject: @escaping RCTPromiseRejectBlock) {
     DispatchQueue.main.async {
-      do {
-        let path = try self.captureToFile(viewTag: viewTag)
-        resolve("file://\(path)")
-      } catch {
-        reject("capture_failed", error.localizedDescription, error)
+      guard let view = QuickPoseView.registry[viewTag.intValue] else {
+        reject("capture_failed", "Could not resolve QuickPoseView for tag \(viewTag)", nil)
+        return
+      }
+      guard let image = view.captureFrame(), let data = image.pngData() else {
+        reject("capture_failed", "No frame available yet — wait a moment after mounting", nil)
+        return
+      }
+      DispatchQueue.global(qos: .userInitiated).async {
+        do {
+          let path = try Self.writePngToTemp(data: data)
+          resolve("file://\(path)")
+        } catch {
+          reject("capture_failed", error.localizedDescription, error)
+        }
       }
     }
   }
@@ -31,8 +41,16 @@ class QuickPoseCaptureModule: NSObject {
                   resolver resolve: @escaping RCTPromiseResolveBlock,
                   rejecter reject: @escaping RCTPromiseRejectBlock) {
     DispatchQueue.main.async {
+      guard let view = QuickPoseView.registry[viewTag.intValue] else {
+        reject("share_failed", "Could not resolve QuickPoseView for tag \(viewTag)", nil)
+        return
+      }
+      guard let image = view.captureFrame(), let data = image.pngData() else {
+        reject("share_failed", "No frame available yet — wait a moment after mounting", nil)
+        return
+      }
       do {
-        let path = try self.captureToFile(viewTag: viewTag)
+        let path = try Self.writePngToTemp(data: data)
         let url = URL(fileURLWithPath: path)
         let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         if let t = title as String? { activity.title = t }
@@ -56,13 +74,7 @@ class QuickPoseCaptureModule: NSObject {
     }
   }
 
-  private func captureToFile(viewTag: NSNumber) throws -> String {
-    guard let view = QuickPoseView.registry[viewTag.intValue] else {
-      throw NSError(domain: "QuickPose", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not resolve QuickPoseView for tag \(viewTag)"])
-    }
-    guard let image = view.latestFrameImage, let data = image.pngData() else {
-      throw NSError(domain: "QuickPose", code: 2, userInfo: [NSLocalizedDescriptionKey: "No frame available yet — wait a moment after mounting"])
-    }
+  private static func writePngToTemp(data: Data) throws -> String {
     let tmpDir = NSTemporaryDirectory()
     let path = (tmpDir as NSString).appendingPathComponent("quickpose_\(Int(Date().timeIntervalSince1970 * 1000)).png")
     try data.write(to: URL(fileURLWithPath: path))

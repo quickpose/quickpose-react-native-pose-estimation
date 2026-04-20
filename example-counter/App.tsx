@@ -1,21 +1,38 @@
 import React, {useRef, useState, useCallback} from 'react';
-import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
-import {QuickPoseView, QuickPoseThresholdCounter} from '@quickpose/react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  Pressable,
+  Image,
+  Modal,
+} from 'react-native';
+import {
+  QuickPoseView,
+  QuickPoseThresholdCounter,
+  type QuickPoseViewRef,
+} from '@quickpose/react-native';
 import {QUICKPOSE_SDK_KEY} from './sdkConfig';
 
 const EXERCISE = 'fitness.pushUps';
 const FEATURES = [EXERCISE, 'overlay.wholeBody'];
 
 const App = () => {
+  const quickposeRef = useRef<QuickPoseViewRef>(null);
   const counter = useRef(new QuickPoseThresholdCounter());
   const [count, setCount] = useState(0);
   const [measure, setMeasure] = useState(0);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [fps, setFps] = useState(0);
+  const [snapshotUri, setSnapshotUri] = useState<string | null>(null);
+  const [capturing, setCapturing] = useState(false);
 
   const handleUpdate = useCallback((event: any) => {
-    const {results, feedback: fb} = event.nativeEvent;
+    const {results, feedback: fb, fps: newFps} = event.nativeEvent;
     const prompt = fb && fb.length > 0 ? fb : null;
     setFeedback(prompt);
+    if (typeof newFps === 'number') setFps(newFps);
 
     const v = results?.find((r: any) => r.feature === EXERCISE)?.value;
     if (typeof v === 'number') {
@@ -27,9 +44,23 @@ const App = () => {
     }
   }, []);
 
+  const onSnapshot = useCallback(async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const uri = await quickposeRef.current?.captureFrame();
+      if (uri) setSnapshotUri(uri);
+    } catch (e) {
+      console.warn('captureFrame failed', e);
+    } finally {
+      setCapturing(false);
+    }
+  }, [capturing]);
+
   return (
     <View style={styles.container}>
       <QuickPoseView
+        ref={quickposeRef}
         sdkKey={QUICKPOSE_SDK_KEY}
         features={FEATURES}
         useFrontCamera={true}
@@ -37,7 +68,11 @@ const App = () => {
         onUpdate={handleUpdate}
       />
 
-      <SafeAreaView style={styles.overlay} pointerEvents="none">
+      <SafeAreaView style={styles.topBar} pointerEvents="none">
+        <Text style={styles.fps}>{fps} fps</Text>
+      </SafeAreaView>
+
+      <SafeAreaView style={styles.overlay}>
         {feedback ? (
           <Text style={styles.prompt}>{feedback}</Text>
         ) : (
@@ -51,7 +86,30 @@ const App = () => {
             ]}
           />
         </View>
+        <Pressable
+          style={[styles.snapshotBtn, capturing && styles.snapshotBtnBusy]}
+          onPress={onSnapshot}
+          disabled={capturing}>
+          <Text style={styles.snapshotBtnText}>
+            {capturing ? 'Capturing…' : 'Snapshot'}
+          </Text>
+        </Pressable>
       </SafeAreaView>
+
+      <Modal
+        visible={snapshotUri != null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSnapshotUri(null)}>
+        <Pressable
+          style={styles.modalBackdrop}
+          onPress={() => setSnapshotUri(null)}>
+          {snapshotUri && (
+            <Image source={{uri: snapshotUri}} style={styles.modalImage} resizeMode="contain" />
+          )}
+          <Text style={styles.modalHint}>Tap to dismiss</Text>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
@@ -59,6 +117,23 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: 'black'},
   camera: {flex: 1},
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+  },
+  fps: {
+    color: '#00FF88',
+    fontSize: 14,
+    fontFamily: 'Courier',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
   overlay: {
     position: 'absolute',
     bottom: 40,
@@ -96,6 +171,36 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#5970F6',
     borderRadius: 4,
+  },
+  snapshotBtn: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#5970F6',
+  },
+  snapshotBtnBusy: {
+    backgroundColor: '#3B4CB8',
+  },
+  snapshotBtnText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalImage: {
+    width: '90%',
+    height: '70%',
+  },
+  modalHint: {
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 20,
+    fontSize: 14,
   },
 });
 

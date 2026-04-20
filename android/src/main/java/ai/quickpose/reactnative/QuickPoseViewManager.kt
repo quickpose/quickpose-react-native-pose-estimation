@@ -206,6 +206,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
                         val event = Arguments.createMap().apply {
                             putString("resultsJson", jsonArray.toString())
                             putString("feedback", feedbackText)
+                            putInt("fps", status.fps)
                         }
                         reactContext
                             .getJSModule(RCTEventEmitter::class.java)

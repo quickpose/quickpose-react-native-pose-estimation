@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.76.9):
     - hermes-engine/Pre-built (= 0.76.9)
   - hermes-engine/Pre-built (0.76.9)
-  - quickpose-react-native (0.3.1):
+  - quickpose-react-native (0.5.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -32,16 +32,16 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - QuickPoseCamera (1.2.13):
-    - QuickPoseCamera/Camera (= 1.2.13)
-  - QuickPoseCamera/Camera (1.2.13):
+  - QuickPoseCamera (1.2.14):
+    - QuickPoseCamera/Camera (= 1.2.14)
+  - QuickPoseCamera/Camera (1.2.14):
     - QuickPoseCore
-  - QuickPoseCore (1.2.13):
-    - QuickPoseCore/Core (= 1.2.13)
-  - QuickPoseCore/Core (1.2.13)
-  - QuickPoseSwiftUI (1.2.13):
-    - QuickPoseSwiftUI/SwiftUI (= 1.2.13)
-  - QuickPoseSwiftUI/SwiftUI (1.2.13):
+  - QuickPoseCore (1.2.14):
+    - QuickPoseCore/Core (= 1.2.14)
+  - QuickPoseCore/Core (1.2.14)
+  - QuickPoseSwiftUI (1.2.14):
+    - QuickPoseSwiftUI/SwiftUI (= 1.2.14)
+  - QuickPoseSwiftUI/SwiftUI (1.2.14):
     - QuickPoseCamera
   - RCT-Folly (2024.10.14.00):
     - boost
@@ -1813,13 +1813,13 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   QuickPoseCamera:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
+    :commit: 509c8155583f10e425ccf19aba051e95cba276d0
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
   QuickPoseCore:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
+    :commit: 509c8155583f10e425ccf19aba051e95cba276d0
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
   QuickPoseSwiftUI:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
+    :commit: 509c8155583f10e425ccf19aba051e95cba276d0
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
 
 SPEC CHECKSUMS:
@@ -1830,10 +1830,10 @@ SPEC CHECKSUMS:
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 12f7fefc143443b7948b8af549b6c9456ff6dcb1
   hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
-  quickpose-react-native: 931c7bacacfc6abe06a388df29229d71f2275e42
-  QuickPoseCamera: 77b30a222ef4fabfd24305060a2a6d43658854c9
-  QuickPoseCore: 81c66625a930ac5ef8fa702d20a1086ec6e504b0
-  QuickPoseSwiftUI: e69fec45353402f539c8bba489954fd44def5dea
+  quickpose-react-native: 6de0886ac68b96c721dacb89c489dbc33bc1b3ff
+  QuickPoseCamera: 379ba402331ed0e02930dfd62a48d47cb91233eb
+  QuickPoseCore: 860979d91638c2ee1a965552e56b42c3516c1a22
+  QuickPoseSwiftUI: 54bf521ecd750cad1890fa2d0c4d33c69f97c10e
   RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
   RCTDeprecation: ebe712bb05077934b16c6bf25228bdec34b64f83
   RCTRequired: ca91e5dd26b64f577b528044c962baf171c6b716

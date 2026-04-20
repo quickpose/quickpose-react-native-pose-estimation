@@ -72,3 +72,6 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Developer's personal SDK key — create your own from sdkConfig.ts.example
+sdkConfig.ts

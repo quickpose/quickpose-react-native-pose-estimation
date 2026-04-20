@@ -2,6 +2,16 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.5.0] - 2026-04-20
+
+### Added
+- `fps` field on the `QuickPoseView` onUpdate event (iOS + Android).
+- iOS `captureFrame()` — on-demand composite of latest camera + skeleton overlay, rendered once per call via `UIGraphicsImageRenderer`. No per-frame compositing pressure on the live pipeline.
+- `example-counter`: FPS HUD + Snapshot button + preview modal.
+
+### Fixed
+- iOS: live view no longer flipped sides when a body entered frame. Bridge no longer appends `.overlayHasCameraAsBackground` to the live feature list; the composite was mirrored while the underlying live camera layer is not, so the overlay appearing over the camera produced a visible flip. Requires `QuickPoseCore` ≥ `1.2.14`.
+
 ## [0.4.1] - 2026-04-17
 
 ### Changed

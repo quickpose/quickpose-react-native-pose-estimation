@@ -265,12 +265,19 @@ class QuickPoseView: UIView {
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
     currentFeatureKeys = keyedFeatures.map { $0.0 }
-    qp.update(features: keyedFeatures.map { $0.1 } + [.overlayHasCameraAsBackground(darkenCamera: 0)])
+    qp.update(features: keyedFeatures.map { $0.1 })
   }
 
-  // Latest composited camera+overlay UIImage, read by QuickPoseCaptureModule.
-  var latestFrameImage: UIImage? {
-    return overlayState.image
+  func captureFrame() -> UIImage? {
+    guard let camera = quickPose?.latestCameraImage else { return nil }
+    let overlay = overlayState.image
+    let size = camera.size
+    let bounds = CGRect(origin: .zero, size: size)
+    let renderer = UIGraphicsImageRenderer(size: size)
+    return renderer.image { _ in
+      camera.draw(in: bounds)
+      overlay?.draw(in: bounds)
+    }
   }
 
   private func tryStart() {
@@ -283,11 +290,7 @@ class QuickPoseView: UIView {
     let keyedFeatures = mapFeatures()
     guard !keyedFeatures.isEmpty else { return }
     currentFeatureKeys = keyedFeatures.map { $0.0 }
-    // Append camera-as-background so the onFrame UIImage delivered to
-    // overlayState is a composite camera+overlay frame. This makes
-    // captureFrame() return a composited PNG without the customer
-    // having to request the feature explicitly.
-    let parsedFeatures = keyedFeatures.map { $0.1 } + [.overlayHasCameraAsBackground(darkenCamera: 0)]
+    let parsedFeatures = keyedFeatures.map { $0.1 }
 
     let wrapperView = QuickPoseCameraWrapperView(
       quickPose: qp,
@@ -311,6 +314,12 @@ class QuickPoseView: UIView {
 
     qp.start(features: parsedFeatures, onFrame: { [weak self] status, image, featureResults, feedback, landmarks in
       self?.overlayState.image = image
+      var fps: Int = 0
+      switch status {
+      case .success(let info): fps = info.fps
+      case .noPersonFound(let info): fps = info.fps
+      case .sdkValidationError: fps = 0
+      }
       if case .success = status {
         guard let self = self, let onUpdate = self.onUpdate else { return }
         let featureKeys = self.currentFeatureKeys
@@ -325,7 +334,7 @@ class QuickPoseView: UIView {
         let jsonData = (try? JSONSerialization.data(withJSONObject: resultArray)) ?? Data()
         let resultsJson = String(data: jsonData, encoding: .utf8) ?? "[]"
         let feedbackText = feedback.values.first?.displayString ?? ""
-        onUpdate(["resultsJson": resultsJson, "feedback": feedbackText])
+        onUpdate(["resultsJson": resultsJson, "feedback": feedbackText, "fps": fps])
       }
     })
   }

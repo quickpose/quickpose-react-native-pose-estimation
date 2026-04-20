@@ -1,0 +1,3 @@
+// Copy this file to sdkConfig.ts and paste your key.
+// Register for a free key at https://dev.quickpose.ai
+export const QUICKPOSE_SDK_KEY = 'YOUR_SDK_KEY_HERE';
