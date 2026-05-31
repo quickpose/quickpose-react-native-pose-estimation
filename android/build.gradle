@@ -65,5 +65,8 @@ dependencies {
     implementation "com.google.flogger:flogger-system-backend:latest.release"
     implementation "com.google.guava:guava:27.0.1-android"
     implementation "com.google.protobuf:protobuf-javalite:3.19.1"
-    implementation "com.microsoft.onnxruntime:onnxruntime-android:latest.release"
+    // Pinned to 1.20.0+ which introduced 16 KB page-size alignment support
+    // (https://onnxruntime.ai/docs/build/android.html).
+    // "latest.release" may resolve to an older artifact on some Gradle setups.
+    implementation "com.microsoft.onnxruntime:onnxruntime-android:1.22.0"
 }
