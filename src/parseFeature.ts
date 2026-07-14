@@ -47,7 +47,11 @@ export function parseFeatureString(
   featureString: string,
   style?: QuickPoseStyle,
 ): ParsedFeature | null {
-  const parts = featureString.split('.');
+  // An optional "#variant" suffix names a styled variant of the same feature:
+  // "overlay.wholeBody#glow" parses as overlay.wholeBody but keeps its own
+  // featureKey (and so its own featureStyles entry and result key).
+  const [featureSpec] = featureString.split('#');
+  const parts = featureSpec!.split('.');
   const category = parts[0];
   if (!category) return null;
 

@@ -154,6 +154,40 @@ class QuickPoseView: UIView {
       }
     }
 
+    let lineCap: QuickPose.Style.LineCap
+    switch dict["lineCap"] as? String {
+    case "butt": lineCap = .butt
+    case "square": lineCap = .square
+    default: lineCap = .round
+    }
+
+    let linePattern: QuickPose.Style.LinePattern
+    switch dict["linePattern"] as? String {
+    case "dashed": linePattern = .dashed
+    case "dotted": linePattern = .dotted
+    default: linePattern = .solid
+    }
+
+    let shadow = (dict["shadow"] as? [String: Any]).map { sh in
+      QuickPose.Style.Shadow(
+        color: (sh["color"] as? String).flatMap(UIColor.fromHex) ?? .black,
+        radius: sh["radius"] as? Double ?? 4,
+        offsetX: sh["offsetX"] as? Double ?? 0,
+        offsetY: sh["offsetY"] as? Double ?? 2
+      )
+    }
+
+    let outline = (dict["outline"] as? [String: Any]).map { o in
+      QuickPose.Style.Outline(
+        color: (o["color"] as? String).flatMap(UIColor.fromHex) ?? .black,
+        relativeWidth: o["relativeWidth"] as? Double ?? 0.25
+      )
+    }
+
+    let imageFill = (dict["imageFill"] as? String).flatMap(loadImageFill)
+    let font = (dict["fontName"] as? String).flatMap { UIFont(name: $0, size: 80) }
+    let letterSpacing = dict["letterSpacing"] as? Double ?? 0
+
     return QuickPose.Style(
       hidden: hidden,
       relativeFontSize: relativeFontSize,
@@ -161,8 +195,28 @@ class QuickPoseView: UIView {
       relativeLineWidth: relativeLineWidth,
       cornerRadius: cornerRadius,
       color: color,
-      conditionalColors: conditionalColors
+      conditionalColors: conditionalColors,
+      lineCap: lineCap,
+      linePattern: linePattern,
+      shadow: shadow,
+      outline: outline,
+      imageFill: imageFill,
+      font: font,
+      letterSpacing: letterSpacing
     )
+  }
+
+  /// Resolves an imageFill spec: bundled image name, file path, or URL — including
+  /// Metro dev-server asset URLs, fetched synchronously (local and one-shot per style change).
+  static func loadImageFill(_ spec: String) -> UIImage? {
+    if let image = UIImage(named: spec) { return image }
+    if let image = UIImage(contentsOfFile: spec) { return image }
+    if let url = URL(string: spec), url.scheme != nil,
+       let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+      return image
+    }
+    print("QuickPose: imageFill '\(spec)' could not be loaded — drawing flat color instead")
+    return nil
   }
 
   // MARK: - Identifier → SDK enum lookups

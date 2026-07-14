@@ -19,3 +19,10 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        // Unreleased quickpose-core versions come from a local `:core:publishToMavenLocal`.
+        mavenLocal()
+    }
+}

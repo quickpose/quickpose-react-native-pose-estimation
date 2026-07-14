@@ -38,6 +38,8 @@ android {
 }
 
 repositories {
+    // Unreleased quickpose-core versions come from a local `:core:publishToMavenLocal`.
+    mavenLocal()
     google()
     mavenCentral()
     maven { url "https://jitpack.io" }
@@ -48,7 +50,7 @@ dependencies {
 
     // QuickPose SDK
     implementation "ai.quickpose:quickpose-mp:0.6"
-    implementation "ai.quickpose:quickpose-core:0.21"
+    implementation "ai.quickpose:quickpose-core:0.22"
 
     // CameraX
     def camerax_version = "1.3.4"

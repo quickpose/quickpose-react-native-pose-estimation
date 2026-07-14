@@ -53,6 +53,31 @@ export interface QuickPoseConditionalColor {
   color: string; // hex e.g. '#FF0000'
 }
 
+export type QuickPoseLineCap = 'round' | 'butt' | 'square';
+
+export type QuickPoseLinePattern = 'solid' | 'dashed' | 'dotted';
+
+/**
+ * Drop shadow behind lines, points and labels. `radius` is the blur in pixels;
+ * `offsetX`/`offsetY` move the shadow right/down on screen. A zero offset with
+ * the line's own color renders as a glow.
+ */
+export interface QuickPoseShadow {
+  color?: string; // hex, default '#000000'
+  radius?: number; // blur in px, default 4
+  offsetX?: number; // default 0
+  offsetY?: number; // default 2
+}
+
+/**
+ * Contrasting border behind lines and points. `relativeWidth` is relative to
+ * the default line width, added on each side.
+ */
+export interface QuickPoseOutline {
+  color?: string; // hex, default '#000000'
+  relativeWidth?: number; // default 0.25
+}
+
 export interface QuickPoseEdgeInsets {
   top?: number;
   left?: number;
@@ -70,6 +95,27 @@ export interface QuickPoseStyle {
   conditionalColors?: QuickPoseConditionalColor[];
   /** Edge insets for the "inside" feature — values are proportions of the camera view (0-0.5). Defaults to 0.1 on all sides. */
   edgeInsets?: QuickPoseEdgeInsets;
+  /** Shape of line endings and joins between limb segments. Default 'round'. */
+  lineCap?: QuickPoseLineCap;
+  /** Stroke pattern for lines and arcs; dash lengths scale with the line width. Default 'solid'. */
+  linePattern?: QuickPoseLinePattern;
+  shadow?: QuickPoseShadow;
+  outline?: QuickPoseOutline;
+  /**
+   * Image revealed through the overlay's lines, points and labels, scaled to
+   * fill the camera frame — the skeleton acts as a mask. Pass a URI: use
+   * `Image.resolveAssetSource(require('./flames.png')).uri` for a bundled
+   * asset, or a `file://` path.
+   */
+  imageFill?: string;
+  /**
+   * Font face for measurement labels: a PostScript/family name on iOS, a
+   * family name or `assets/fonts/<name>.ttf` file name on Android. Size is
+   * always 80 scaled by `relativeFontSize`.
+   */
+  fontName?: string;
+  /** Letter spacing for measurement labels in ems (fraction of the text size). */
+  letterSpacing?: number;
 }
 
 export interface QuickPoseViewProps {

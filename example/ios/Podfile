@@ -15,9 +15,10 @@ end
 
 target 'QuickPoseExample' do
   # QuickPose SDK pods (hosted on GitHub, not CocoaPods trunk)
-  pod 'QuickPoseCore', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git'
-  pod 'QuickPoseCamera', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git'
-  pod 'QuickPoseSwiftUI', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git'
+  # Local checkout with the unreleased styling options — swap back to :git for releases
+  pod 'QuickPoseCore', :path => '../../../quickpose-ios-sdk-private/quickpose-ios-sdk'
+  pod 'QuickPoseCamera', :path => '../../../quickpose-ios-sdk-private/quickpose-ios-sdk'
+  pod 'QuickPoseSwiftUI', :path => '../../../quickpose-ios-sdk-private/quickpose-ios-sdk'
 
   # QuickPose React Native plugin
   pod 'quickpose-react-native', :path => '../..'
@@ -39,5 +40,15 @@ target 'QuickPoseExample' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
     )
+    # fmt 11's consteval format-string checking miscompiles under Xcode 26.4's clang
+    # (constexpr pointer arithmetic across string literals), and fmt hardcodes its
+    # consteval detection with no override macro. Compiling the fmt target as C++17
+    # removes __cpp_consteval so fmt disables the feature itself.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
   end
 end

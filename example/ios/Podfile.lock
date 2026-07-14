@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.76.9):
     - hermes-engine/Pre-built (= 0.76.9)
   - hermes-engine/Pre-built (0.76.9)
-  - quickpose-react-native (0.3.1):
+  - quickpose-react-native (0.3.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1605,9 +1605,9 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - quickpose-react-native (from `../..`)
-  - QuickPoseCamera (from `https://github.com/quickpose/quickpose-ios-sdk.git`)
-  - QuickPoseCore (from `https://github.com/quickpose/quickpose-ios-sdk.git`)
-  - QuickPoseSwiftUI (from `https://github.com/quickpose/quickpose-ios-sdk.git`)
+  - QuickPoseCamera (from `../../../quickpose-ios-sdk-private/quickpose-ios-sdk`)
+  - QuickPoseCore (from `../../../quickpose-ios-sdk-private/quickpose-ios-sdk`)
+  - QuickPoseSwiftUI (from `../../../quickpose-ios-sdk-private/quickpose-ios-sdk`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -1691,11 +1691,11 @@ EXTERNAL SOURCES:
   quickpose-react-native:
     :path: "../.."
   QuickPoseCamera:
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
+    :path: "../../../quickpose-ios-sdk-private/quickpose-ios-sdk"
   QuickPoseCore:
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
+    :path: "../../../quickpose-ios-sdk-private/quickpose-ios-sdk"
   QuickPoseSwiftUI:
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
+    :path: "../../../quickpose-ios-sdk-private/quickpose-ios-sdk"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -1811,17 +1811,6 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
-CHECKOUT OPTIONS:
-  QuickPoseCamera:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
-  QuickPoseCore:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
-  QuickPoseSwiftUI:
-    :commit: 1be84c04166bfc471c7663b7ef4dde09c4c7d9ec
-    :git: https://github.com/quickpose/quickpose-ios-sdk.git
-
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
@@ -1830,7 +1819,7 @@ SPEC CHECKSUMS:
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 12f7fefc143443b7948b8af549b6c9456ff6dcb1
   hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
-  quickpose-react-native: 931c7bacacfc6abe06a388df29229d71f2275e42
+  quickpose-react-native: 40727c9ef4ea4c2098145a7b8968abd4c74a6e77
   QuickPoseCamera: 77b30a222ef4fabfd24305060a2a6d43658854c9
   QuickPoseCore: 81c66625a930ac5ef8fa702d20a1086ec6e504b0
   QuickPoseSwiftUI: e69fec45353402f539c8bba489954fd44def5dea
@@ -1893,6 +1882,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
-PODFILE CHECKSUM: 6c1cbc4a3f6734d692ca4c5bd559878c5503f385
+PODFILE CHECKSUM: b696b13f09d6b7f367cdc298955c3ade6be77084
 
 COCOAPODS: 1.16.2

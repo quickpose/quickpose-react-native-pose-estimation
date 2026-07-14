@@ -52,6 +52,7 @@ import { QuickPoseView } from '@quickpose/react-native';
 | `features` | `string[]` | *required* | Feature identifiers to activate |
 | `useFrontCamera` | `boolean` | `true` | Use front-facing camera |
 | `style` | `ViewStyle` | — | Standard React Native style |
+| `featureStyles` | `Record<string, QuickPoseStyle>` | — | Per-feature overlay styling, keyed by feature string |
 | `onUpdate` | `(event) => void` | — | Called each frame with results and feedback |
 
 ## Feature Strings
@@ -116,6 +117,32 @@ import { QuickPoseView } from '@quickpose/react-native';
 | `thumbsUpOrDown` | Detect thumbs up or down |
 
 Side variants: append `.left` or `.right` (e.g. `raisedFingers.left`).
+
+## Styling
+
+Every feature accepts a `QuickPoseStyle` via the `featureStyles` prop, keyed by the feature string. An optional `#variant` suffix names a styled variant of the same feature (`overlay.wholeBody#glow`).
+
+```tsx
+<QuickPoseView
+  features={['overlay.wholeBody']}
+  featureStyles={{
+    'overlay.wholeBody': {
+      color: '#00FF88',
+      relativeLineWidth: 1.5,
+      lineCap: 'round',
+      linePattern: 'dashed',
+      shadow: {color: '#00FF88', radius: 14, offsetX: 0, offsetY: 0},
+      outline: {color: '#000000', relativeWidth: 0.3},
+      imageFill: Image.resolveAssetSource(require('./flames.png')).uri,
+      fontName: 'Bungee-Regular',
+      letterSpacing: 0.08,
+      conditionalColors: [{min: 120, color: '#00FF00'}],
+    },
+  }}
+/>
+```
+
+See the [QuickPose styling docs](https://docs.quickpose.ai/docs/MobileSDK/Features/Annotations%20and%20Styling) for what each option draws. `imageFill` reveals an image through the skeleton's lines, points and labels; `fontName` and `letterSpacing` style the measurement labels; a `shadow` with zero offset in the line's own color renders as a glow.
 
 ## Example Apps
 

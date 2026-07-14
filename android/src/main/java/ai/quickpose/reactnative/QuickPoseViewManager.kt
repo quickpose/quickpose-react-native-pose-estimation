@@ -37,10 +37,12 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
     private var useFrontCamera: Boolean = true
     private var hasStarted = false
     private var currentFeatures: List<Pair<String, Feature>> = emptyList()
+    private var appContext: android.content.Context? = null
 
     override fun getName(): String = REACT_CLASS
 
     override fun createViewInstance(reactContext: ThemedReactContext): FrameLayout {
+        appContext = reactContext.applicationContext
         val container = FrameLayout(reactContext)
 
         val activity = reactContext.currentActivity ?: return container
@@ -180,7 +182,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
 
         val keyed = mapFeatures()
         if (keyed.isEmpty()) return
-        currentFeatureKeys = keyed.map { it.first }
+        currentFeatures = keyed
         val features = keyed.map { it.second }.toTypedArray()
 
         val lifecycleOwner = activity as? androidx.lifecycle.LifecycleOwner ?: return
@@ -367,14 +369,93 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             }
         }
 
+        val lineCap = when (map.str("lineCap")) {
+            "butt" -> Style.LineCap.BUTT
+            "square" -> Style.LineCap.SQUARE
+            else -> Style.LineCap.ROUND
+        }
+
+        val linePattern = when (map.str("linePattern")) {
+            "dashed" -> Style.LinePattern.DASHED
+            "dotted" -> Style.LinePattern.DOTTED
+            else -> Style.LinePattern.SOLID
+        }
+
+        val shadow = map.map("shadow")?.let { sh ->
+            Style.Shadow(
+                color = sh.str("color")?.let { parseColorOrNull(it) } ?: Color.valueOf(Color.BLACK),
+                radius = sh.dbl("radius", 4.0).toFloat(),
+                offsetX = sh.dbl("offsetX", 0.0).toFloat(),
+                offsetY = sh.dbl("offsetY", 2.0).toFloat()
+            )
+        }
+
+        val outline = map.map("outline")?.let { o ->
+            Style.Outline(
+                color = o.str("color")?.let { parseColorOrNull(it) } ?: Color.valueOf(Color.BLACK),
+                relativeWidth = o.dbl("relativeWidth", 0.25).toFloat()
+            )
+        }
+
+        val imageFill = map.str("imageFill")?.let { loadImageFill(it) }
+        val typeface = map.str("fontName")?.let { loadTypeface(it) }
+        val letterSpacing = map.dbl("letterSpacing", 0.0).toFloat()
+
         return Style(
             relativeFontSize = relativeFontSize,
             relativeArcSize = relativeArcSize,
             relativeLineWidth = relativeLineWidth,
             color = color,
             cornerRadius = cornerRadius,
-            conditionalColors = conditionalColors
+            conditionalColors = conditionalColors,
+            lineCap = lineCap,
+            linePattern = linePattern,
+            shadow = shadow,
+            outline = outline,
+            imageFill = imageFill,
+            typeface = typeface,
+            letterSpacing = letterSpacing
         )
+    }
+
+    private fun parseColorOrNull(hex: String): Color? =
+        try { Color.valueOf(Color.parseColor(hex)) } catch (e: Exception) { null }
+
+    /**
+     * Resolves an imageFill spec: file path, or URL — including Metro dev-server asset
+     * URLs. URL fetches run on a joined worker thread: network is forbidden on the main
+     * thread, and this is local, one-shot per style change.
+     */
+    private fun loadImageFill(spec: String): android.graphics.Bitmap? {
+        java.io.File(spec.removePrefix("file://")).takeIf { it.exists() }?.let {
+            return android.graphics.BitmapFactory.decodeFile(it.path)
+        }
+        var fetched: android.graphics.Bitmap? = null
+        val worker = Thread {
+            fetched = try {
+                java.net.URL(spec).openStream().use { android.graphics.BitmapFactory.decodeStream(it) }
+            } catch (e: Exception) {
+                null
+            }
+        }
+        worker.start()
+        worker.join()
+        if (fetched == null) {
+            android.util.Log.w(REACT_CLASS, "imageFill '$spec' could not be loaded — drawing flat color instead")
+        }
+        return fetched
+    }
+
+    /** Loads `assets/fonts/<name>.ttf` (the React Native font convention) or falls back to a system family. */
+    private fun loadTypeface(name: String): android.graphics.Typeface? {
+        appContext?.let { context ->
+            try {
+                return android.graphics.Typeface.createFromAsset(context.assets, "fonts/$name.ttf")
+            } catch (e: Exception) {
+                // Not a bundled asset font — fall through to a system family lookup.
+            }
+        }
+        return android.graphics.Typeface.create(name, android.graphics.Typeface.NORMAL)
     }
 
     // MARK: - ReadableMap convenience

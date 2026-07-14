@@ -9,8 +9,73 @@ import {
   SafeAreaView,
   Linking,
 } from 'react-native';
-import {QuickPoseView, QuickPoseViewRef} from '@quickpose/react-native';
+import {Image} from 'react-native';
+import {
+  QuickPoseView,
+  QuickPoseViewRef,
+  QuickPoseStyle,
+} from '@quickpose/react-native';
 import {QUICKPOSE_SDK_KEY} from './sdkConfig';
+
+type StyleOption = {label: string; values: string[]; defaultValue?: string};
+
+const STYLE_OPTIONS: StyleOption[] = [
+  {label: 'Color', values: ['White', 'Green', 'Red']},
+  {label: 'Line Width', values: ['0.5', '1.0', '1.5', '2.0'], defaultValue: '1.0'},
+  {label: 'Line Cap', values: ['Round', 'Butt', 'Square']},
+  {label: 'Pattern', values: ['Solid', 'Dashed', 'Dotted']},
+  {label: 'Effect', values: ['None', 'Shadow', 'Glow']},
+  {label: 'Outline', values: ['Off', 'On']},
+  {label: 'Image Fill', values: ['None', 'Orange Glow', 'Galaxy']},
+  {label: 'Font', values: ['System', 'Custom']},
+  {label: 'Letter Spacing', values: ['0', '0.08', '0.15']},
+];
+
+const DEFAULT_STYLE_SELECTIONS: Record<string, string> = Object.fromEntries(
+  STYLE_OPTIONS.map(o => [o.label, o.defaultValue ?? o.values[0]!]),
+);
+
+function isDefaultValue(option: StyleOption, value: string): boolean {
+  return value === (option.defaultValue ?? option.values[0]);
+}
+
+function buildStyle(selections: Record<string, string>): QuickPoseStyle {
+  const color =
+    selections['Color'] === 'Green'
+      ? '#00FF00'
+      : selections['Color'] === 'Red'
+        ? '#FF0000'
+        : '#FFFFFF';
+  const style: QuickPoseStyle = {color};
+  const lineWidth = Number(selections['Line Width']);
+  if (lineWidth !== 1) style.relativeLineWidth = lineWidth;
+  if (selections['Line Cap'] === 'Butt') style.lineCap = 'butt';
+  if (selections['Line Cap'] === 'Square') style.lineCap = 'square';
+  if (selections['Pattern'] === 'Dashed') style.linePattern = 'dashed';
+  if (selections['Pattern'] === 'Dotted') style.linePattern = 'dotted';
+  if (selections['Effect'] === 'Shadow') {
+    style.shadow = {color: '#000000', radius: 14, offsetX: 0, offsetY: 10};
+  }
+  if (selections['Effect'] === 'Glow') {
+    style.shadow = {color, radius: 32, offsetX: 0, offsetY: 0};
+  }
+  if (selections['Outline'] === 'On') {
+    style.outline = {color: '#000000', relativeWidth: 0.6};
+  }
+  if (selections['Image Fill'] === 'Orange Glow') {
+    style.imageFill = Image.resolveAssetSource(require('./orange-glow.png')).uri;
+  }
+  if (selections['Image Fill'] === 'Galaxy') {
+    style.imageFill = Image.resolveAssetSource(require('./galaxy.jpg')).uri;
+  }
+  if (selections['Font'] === 'Custom') {
+    // Bungee-Regular is bundled on both platforms so Custom renders identically.
+    style.fontName = 'Bungee-Regular';
+  }
+  const spacing = Number(selections['Letter Spacing']);
+  if (spacing !== 0) style.letterSpacing = spacing;
+  return style;
+}
 
 const FEATURE_CATEGORIES: Record<string, {label: string; feature: string}[]> = {
   Overlay: [
@@ -74,6 +139,9 @@ const App = () => {
   const [selectedFeatureIdx, setSelectedFeatureIdx] = useState(0);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showFeaturePicker, setShowFeaturePicker] = useState(false);
+  const [showStylePicker, setShowStylePicker] = useState(false);
+  const [openStyleOption, setOpenStyleOption] = useState<StyleOption | null>(null);
+  const [styleSelections, setStyleSelections] = useState(DEFAULT_STYLE_SELECTIONS);
   const [value, setValue] = useState(0);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [counter, setCounter] = useState(0);
@@ -131,6 +199,7 @@ const App = () => {
         ref={poseRef}
         sdkKey={QUICKPOSE_SDK_KEY}
         features={[currentFeature.feature]}
+        featureStyles={{[currentFeature.feature]: buildStyle(styleSelections)}}
         useFrontCamera={true}
         style={styles.camera}
         onUpdate={handleUpdate}
@@ -146,6 +215,11 @@ const App = () => {
           style={styles.pickerButton}
           onPress={() => setShowFeaturePicker(true)}>
           <Text style={styles.pickerButtonText}>{currentFeature.label}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.pickerButton}
+          onPress={() => setShowStylePicker(true)}>
+          <Text style={styles.pickerButtonText}>Style</Text>
         </TouchableOpacity>
       </SafeAreaView>
 
@@ -203,6 +277,75 @@ const App = () => {
           <Text style={styles.brandingText}>Powered by QuickPose.ai</Text>
         </TouchableOpacity>
       </SafeAreaView>
+
+      <Modal visible={showStylePicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {openStyleOption ? openStyleOption.label : 'Overlay Style'}
+            </Text>
+            {openStyleOption ? (
+              <FlatList
+                data={openStyleOption.values}
+                keyExtractor={item => item}
+                renderItem={({item}) => {
+                  const selected = styleSelections[openStyleOption.label] === item;
+                  return (
+                    <TouchableOpacity
+                      style={[styles.modalItem, selected && styles.modalItemSelected]}
+                      onPress={() => {
+                        setStyleSelections({
+                          ...styleSelections,
+                          [openStyleOption.label]: item,
+                        });
+                        setOpenStyleOption(null);
+                      }}>
+                      <Text
+                        style={[
+                          styles.modalItemText,
+                          selected && styles.modalItemTextSelected,
+                        ]}>
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            ) : (
+              <FlatList
+                data={STYLE_OPTIONS}
+                keyExtractor={item => item.label}
+                renderItem={({item}) => {
+                  const current = styleSelections[item.label]!;
+                  const isDefault = isDefaultValue(item, current);
+                  return (
+                    <TouchableOpacity
+                      style={[styles.modalItem, !isDefault && styles.modalItemSelected]}
+                      onPress={() => setOpenStyleOption(item)}>
+                      <Text
+                        style={[
+                          styles.modalItemText,
+                          !isDefault && styles.modalItemTextSelected,
+                        ]}>
+                        {item.label}: {current}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            )}
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={() =>
+                openStyleOption ? setOpenStyleOption(null) : setShowStylePicker(false)
+              }>
+              <Text style={styles.modalCloseText}>
+                {openStyleOption ? 'Back' : 'Done'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={showCategoryPicker} transparent animationType="slide">
         <View style={styles.modalOverlay}>

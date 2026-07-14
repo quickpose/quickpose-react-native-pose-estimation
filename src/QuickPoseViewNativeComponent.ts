@@ -15,6 +15,18 @@ type NativeConditionalColor = Readonly<{
   color: string;
 }>;
 
+type NativeShadow = Readonly<{
+  color?: string;
+  radius?: Double;
+  offsetX?: Double;
+  offsetY?: Double;
+}>;
+
+type NativeOutline = Readonly<{
+  color?: string;
+  relativeWidth?: Double;
+}>;
+
 type NativeStyle = Readonly<{
   color?: string;
   relativeFontSize?: Double;
@@ -24,6 +36,13 @@ type NativeStyle = Readonly<{
   hidden?: boolean;
   conditionalColors?: ReadonlyArray<NativeConditionalColor>;
   edgeInsets?: NativeEdgeInsets;
+  lineCap?: string;
+  linePattern?: string;
+  shadow?: NativeShadow;
+  outline?: NativeOutline;
+  imageFill?: string;
+  fontName?: string;
+  letterSpacing?: Double;
 }>;
 
 type NativeFeature = Readonly<{
