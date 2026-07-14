@@ -533,7 +533,8 @@ const styles = StyleSheet.create({
   },
   modalCloseText: {
     fontSize: 16,
-    color: '#999',
+    fontWeight: '600',
+    color: '#5970F6',
   },
   bottomBranding: {
     position: 'absolute',
