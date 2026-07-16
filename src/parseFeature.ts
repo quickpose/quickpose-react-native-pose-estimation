@@ -19,7 +19,7 @@ const ROM_JOINTS: ReadonlySet<string> = new Set<ROMJoint>([
 ]);
 
 const FITNESS_EXERCISES: ReadonlySet<string> = new Set<FitnessExercise>([
-  'squats', 'pushUps', 'jumpingJacks', 'sumoSquats', 'lunges',
+  'squats', 'pushUps', 'frontPushUps', 'jumpingJacks', 'sumoSquats', 'lunges',
   'sitUps', 'cobraWings', 'plank', 'plankStraightArm', 'legRaises',
   'gluteBridge', 'overheadDumbbellPress', 'vUps', 'lateralRaises',
   'frontRaises', 'hipAbductionStanding', 'sideLunges', 'bicepCurls',

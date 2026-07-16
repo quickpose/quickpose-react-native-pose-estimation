@@ -2,6 +2,21 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.6.0] - 2026-07-16
+
+### Added
+- Overlay styling on `QuickPoseStyle` (via the `featureStyles` prop), matching the native iOS 1.3.0 / Android 0.22 SDKs:
+  - `lineCap` (`round` / `butt` / `square`) and `linePattern` (`solid` / `dashed` / `dotted`).
+  - `shadow` (`color`, `radius`, `offsetX`, `offsetY`) — a zero-offset shadow in the line's own colour renders as a glow.
+  - `outline` (`color`, `relativeWidth`) — a contrasting border behind lines and points.
+  - `imageFill` — an image revealed through the overlay's lines, points and labels (the skeleton acts as a mask). Pass a bundled asset URI via `Image.resolveAssetSource(require('./flames.png')).uri` or a `file://` path.
+  - `fontName` and `letterSpacing` for measurement labels.
+- `fitness.frontPushUps` exercise.
+- `example`: styling picker demonstrating every new option, plus bundled `galaxy.jpg` / `orange-glow.png` imageFill assets and the Bungee font.
+
+### Changed
+- Native SDK dependencies bumped to iOS `1.3.0` (pods) and Android `ai.quickpose:quickpose-core:0.22`.
+
 ## [0.5.1] - 2026-04-20
 
 ### Changed

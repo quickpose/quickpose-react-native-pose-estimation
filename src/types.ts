@@ -13,7 +13,7 @@ export type LandmarksGroup =
 export type ROMJoint = 'neck' | 'shoulder' | 'elbow' | 'hip' | 'back' | 'knee' | 'ankle';
 
 export type FitnessExercise =
-  | 'squats' | 'pushUps' | 'jumpingJacks' | 'sumoSquats' | 'lunges'
+  | 'squats' | 'pushUps' | 'frontPushUps' | 'jumpingJacks' | 'sumoSquats' | 'lunges'
   | 'sitUps' | 'cobraWings' | 'plank' | 'plankStraightArm' | 'legRaises'
   | 'gluteBridge' | 'overheadDumbbellPress' | 'vUps' | 'lateralRaises'
   | 'frontRaises' | 'hipAbductionStanding' | 'sideLunges' | 'bicepCurls'

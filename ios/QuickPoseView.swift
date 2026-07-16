@@ -278,6 +278,7 @@ class QuickPoseView: UIView {
     switch exercise {
     case "squats": return .squats
     case "pushUps": return .pushUps
+    case "frontPushUps": return .frontPushUps
     case "jumpingJacks": return .jumpingJacks
     case "sumoSquats": return .sumoSquats
     case "lunges": return .lunges(side: side ?? .left)

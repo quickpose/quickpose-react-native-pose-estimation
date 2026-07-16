@@ -314,6 +314,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
         return when (exercise) {
             "squats" -> FitnessFeature.Squats
             "pushUps" -> FitnessFeature.PushUps
+            "frontPushUps" -> FitnessFeature.FrontPushUps
             "jumpingJacks" -> FitnessFeature.JumpingJacks
             "sumoSquats" -> FitnessFeature.SumoSquats
             "lunges" -> FitnessFeature.Lunges(side ?: Side.LEFT)
