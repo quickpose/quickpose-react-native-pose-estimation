@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.76.9):
     - hermes-engine/Pre-built (= 0.76.9)
   - hermes-engine/Pre-built (0.76.9)
-  - quickpose-react-native (0.6.0):
+  - quickpose-react-native (0.6.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -32,16 +32,16 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - QuickPoseCamera (1.3.0):
-    - QuickPoseCamera/Camera (= 1.3.0)
-  - QuickPoseCamera/Camera (1.3.0):
+  - QuickPoseCamera (1.4.0):
+    - QuickPoseCamera/Camera (= 1.4.0)
+  - QuickPoseCamera/Camera (1.4.0):
     - QuickPoseCore
-  - QuickPoseCore (1.3.0):
-    - QuickPoseCore/Core (= 1.3.0)
-  - QuickPoseCore/Core (1.3.0)
-  - QuickPoseSwiftUI (1.3.0):
-    - QuickPoseSwiftUI/SwiftUI (= 1.3.0)
-  - QuickPoseSwiftUI/SwiftUI (1.3.0):
+  - QuickPoseCore (1.4.0):
+    - QuickPoseCore/Core (= 1.4.0)
+  - QuickPoseCore/Core (1.4.0)
+  - QuickPoseSwiftUI (1.4.0):
+    - QuickPoseSwiftUI/SwiftUI (= 1.4.0)
+  - QuickPoseSwiftUI/SwiftUI (1.4.0):
     - QuickPoseCamera
   - RCT-Folly (2024.10.14.00):
     - boost
@@ -1605,9 +1605,9 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - quickpose-react-native (from `../..`)
-  - QuickPoseCamera (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.3.0`)
-  - QuickPoseCore (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.3.0`)
-  - QuickPoseSwiftUI (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.3.0`)
+  - QuickPoseCamera (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.4.0`)
+  - QuickPoseCore (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.4.0`)
+  - QuickPoseSwiftUI (from `https://github.com/quickpose/quickpose-ios-sdk.git`, tag `v1.4.0`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -1692,13 +1692,13 @@ EXTERNAL SOURCES:
     :path: "../.."
   QuickPoseCamera:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
   QuickPoseCore:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
   QuickPoseSwiftUI:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -1817,13 +1817,13 @@ EXTERNAL SOURCES:
 CHECKOUT OPTIONS:
   QuickPoseCamera:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
   QuickPoseCore:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
   QuickPoseSwiftUI:
     :git: https://github.com/quickpose/quickpose-ios-sdk.git
-    :tag: v1.3.0
+    :tag: v1.4.0
 
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
@@ -1833,10 +1833,10 @@ SPEC CHECKSUMS:
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 12f7fefc143443b7948b8af549b6c9456ff6dcb1
   hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
-  quickpose-react-native: a39801ecece6129b9723101b055320276e533690
-  QuickPoseCamera: 174ff71d4c2d822db0155f1b75d5ad8b8eef8258
-  QuickPoseCore: 16ce0b995be362068006097be4c544c8ca7bb0b8
-  QuickPoseSwiftUI: 491e6f34cf752615f1a9c2c0b1d68c0843548c22
+  quickpose-react-native: 4d6af2ff29a7ae9a7f9e7a831e9b2f45f4159563
+  QuickPoseCamera: ac83acec00c86b67c9f32697a175e51d0fe49e76
+  QuickPoseCore: ea1495bbfa9af6f285885bfaa27b9e8914d862d1
+  QuickPoseSwiftUI: a622410abadc6a5afd71a7f6a466b208170f4e13
   RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
   RCTDeprecation: ebe712bb05077934b16c6bf25228bdec34b64f83
   RCTRequired: ca91e5dd26b64f577b528044c962baf171c6b716
@@ -1896,6 +1896,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
-PODFILE CHECKSUM: d12dd8071aa94a079fbcf09f26d6597d53394ac0
+PODFILE CHECKSUM: 242aaee5c2292243099f0f9734910079880397d8
 
 COCOAPODS: 1.16.2

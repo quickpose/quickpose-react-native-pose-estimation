@@ -2,6 +2,11 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.6.1] - 2026-08-12
+
+### Changed
+- Android core bumped to `ai.quickpose:quickpose-core:0.23` — ONNX Runtime removed (pure-Kotlin tree-ensemble classifiers). Consuming apps drop ~90 MB of `onnxruntime-android` native `.so` libs. **Predictions are unchanged.** iOS unaffected.
+
 ## [0.6.0] - 2026-07-16
 
 ### Added

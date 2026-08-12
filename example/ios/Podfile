@@ -14,10 +14,12 @@ if linkage != nil
 end
 
 target 'QuickPoseExample' do
-  # QuickPose SDK pods (hosted on GitHub, not CocoaPods trunk)
-  pod 'QuickPoseCore', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => 'v1.3.0'
-  pod 'QuickPoseCamera', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => 'v1.3.0'
-  pod 'QuickPoseSwiftUI', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => 'v1.3.0'
+  # QuickPose SDK pods (hosted on GitHub, not CocoaPods trunk).
+  # Single source of truth for the pinned iOS SDK tag — bumped by scripts/release.sh.
+  quickpose_ios_tag = 'v1.4.0'
+  pod 'QuickPoseCore', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
+  pod 'QuickPoseCamera', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
+  pod 'QuickPoseSwiftUI', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
 
   # QuickPose React Native plugin
   pod 'quickpose-react-native', :path => '../..'
