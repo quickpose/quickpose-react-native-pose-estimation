@@ -17,7 +17,8 @@ export type FitnessExercise =
   | 'sitUps' | 'cobraWings' | 'plank' | 'plankStraightArm' | 'legRaises'
   | 'gluteBridge' | 'overheadDumbbellPress' | 'vUps' | 'lateralRaises'
   | 'frontRaises' | 'hipAbductionStanding' | 'sideLunges' | 'bicepCurls'
-  | 'bicepCurlsSingleArm' | 'overarmReachBilateral' | 'kneeRaisesBilateral';
+  | 'bicepCurlsSingleArm' | 'overarmReachBilateral' | 'kneeRaisesBilateral'
+  | 'skipping' | 'burpees' | 'shoulderTaps' | 'highKneeTaps' | 'mountainClimbers' | 'boxing';
 
 // --- Parsed feature sent to native as structured JSON ---
 
@@ -90,6 +91,8 @@ export interface QuickPoseStyle {
   relativeFontSize?: number;
   relativeArcSize?: number;
   relativeLineWidth?: number;
+  /** Scales the landmark dots drawn by the points feature. 0.3 draws points at 30% of the default size. */
+  relativePointSize?: number;
   cornerRadius?: number;
   hidden?: boolean; // iOS only — hides the overlay rendering
   conditionalColors?: QuickPoseConditionalColor[];

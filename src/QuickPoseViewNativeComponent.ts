@@ -32,6 +32,7 @@ type NativeStyle = Readonly<{
   relativeFontSize?: Double;
   relativeArcSize?: Double;
   relativeLineWidth?: Double;
+  relativePointSize?: Double;
   cornerRadius?: Double;
   hidden?: boolean;
   conditionalColors?: ReadonlyArray<NativeConditionalColor>;

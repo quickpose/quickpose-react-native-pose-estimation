@@ -24,6 +24,7 @@ const FITNESS_EXERCISES: ReadonlySet<string> = new Set<FitnessExercise>([
   'gluteBridge', 'overheadDumbbellPress', 'vUps', 'lateralRaises',
   'frontRaises', 'hipAbductionStanding', 'sideLunges', 'bicepCurls',
   'bicepCurlsSingleArm', 'overarmReachBilateral', 'kneeRaisesBilateral',
+  'skipping', 'burpees', 'shoulderTaps', 'highKneeTaps', 'mountainClimbers', 'boxing',
 ]);
 
 function parseSide(value: string | undefined): Side | undefined {

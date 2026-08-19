@@ -332,6 +332,12 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             "sideLunges" -> FitnessFeature.SideLunges(side ?: Side.LEFT)
             "bicepCurls" -> FitnessFeature.BicepCurls
             "bicepCurlsSingleArm" -> FitnessFeature.BicepCurlsSingleArm(side ?: Side.LEFT)
+            "skipping" -> FitnessFeature.Skipping
+            "burpees" -> FitnessFeature.Burpees
+            "shoulderTaps" -> FitnessFeature.ShoulderTaps
+            "highKneeTaps" -> FitnessFeature.HighKneeTaps
+            "mountainClimbers" -> FitnessFeature.MountainClimbers
+            "boxing" -> FitnessFeature.Boxing
             else -> null
         }
     }
@@ -356,6 +362,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
         val relativeFontSize = map.dbl("relativeFontSize", 1.0).toFloat()
         val relativeArcSize = map.dbl("relativeArcSize", 1.0).toFloat()
         val relativeLineWidth = map.dbl("relativeLineWidth", 1.0).toFloat()
+        val relativePointSize = map.dbl("relativePointSize", 1.0).toFloat()
         val cornerRadius = map.dbl("cornerRadius", 0.0).toFloat()
 
         val conditionalColors = map.array("conditionalColors")?.let { arr ->
@@ -406,6 +413,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
             relativeFontSize = relativeFontSize,
             relativeArcSize = relativeArcSize,
             relativeLineWidth = relativeLineWidth,
+            relativePointSize = relativePointSize,
             color = color,
             cornerRadius = cornerRadius,
             conditionalColors = conditionalColors,

@@ -141,6 +141,7 @@ class QuickPoseView: UIView {
     let relativeFontSize = dict["relativeFontSize"] as? Double ?? 1.0
     let relativeArcSize = dict["relativeArcSize"] as? Double ?? 1.0
     let relativeLineWidth = dict["relativeLineWidth"] as? Double ?? 1.0
+    let relativePointSize = dict["relativePointSize"] as? Double ?? 1.0
     let cornerRadius = dict["cornerRadius"] as? Double ?? 0.0
 
     var conditionalColors: [QuickPose.Style.ConditionalColor]? = nil
@@ -193,6 +194,7 @@ class QuickPoseView: UIView {
       relativeFontSize: relativeFontSize,
       relativeArcSize: relativeArcSize,
       relativeLineWidth: relativeLineWidth,
+      relativePointSize: relativePointSize,
       cornerRadius: cornerRadius,
       color: color,
       conditionalColors: conditionalColors,
@@ -296,6 +298,12 @@ class QuickPoseView: UIView {
     case "sideLunges": return .sideLunges(side: side ?? .left)
     case "bicepCurls": return .bicepCurls
     case "bicepCurlsSingleArm": return .bicepCurlsSingleArm(side: side ?? .left)
+    case "skipping": return .skipping
+    case "burpees": return .burpees
+    case "shoulderTaps": return .shoulderTaps
+    case "highKneeTaps": return .highKneeTaps
+    case "mountainClimbers": return .mountainClimbers
+    case "boxing": return .boxing
     default: return nil
     }
   }

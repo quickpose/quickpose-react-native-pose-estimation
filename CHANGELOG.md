@@ -2,6 +2,16 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.7.0] - 2026-08-19
+
+### Added
+- Six new fitness exercises: `skipping`, `burpees`, `shoulderTaps`, `highKneeTaps`, `mountainClimbers`, `boxing` (e.g. `fitness.burpees`)
+- `relativePointSize` style option — scales the landmark dots drawn by the points feature (0.3 draws points at 30% of the default size)
+
+### Changed
+- Android core bumped to `ai.quickpose:quickpose-core:0.24`; iOS pods resolve QuickPoseCore 1.6.0
+- Pushups now count when filmed head-on (front-facing) as well as side-on (from the native SDKs)
+
 ## [0.6.1] - 2026-08-12
 
 ### Changed
