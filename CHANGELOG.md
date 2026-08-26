@@ -2,6 +2,12 @@
 
 All notable changes to `@quickpose/react-native` will be documented in this file.
 
+## [0.7.1] - 2026-08-26
+
+### Changed
+- Android core bumped to `ai.quickpose:quickpose-core:0.25` — frame pipelining (FlowLimiter `max_in_queue: 1`), graph input downscaled to a 720 px long edge, hand tracking now explicit via `ModelConfig(detailedHandTracking)` (default on — behaviour unchanged for RN apps)
+- iOS pods bumped to QuickPoseCore 1.7.0 — same pipelining change in the bundled MediaPipe graph
+
 ## [0.7.0] - 2026-08-19
 
 ### Added

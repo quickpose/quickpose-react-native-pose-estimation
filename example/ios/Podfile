@@ -16,7 +16,7 @@ end
 target 'QuickPoseExample' do
   # QuickPose SDK pods (hosted on GitHub, not CocoaPods trunk).
   # Single source of truth for the pinned iOS SDK tag — bumped by scripts/release.sh.
-  quickpose_ios_tag = 'v1.6.0'
+  quickpose_ios_tag = 'v1.7.0'
   pod 'QuickPoseCore', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
   pod 'QuickPoseCamera', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
   pod 'QuickPoseSwiftUI', :git => 'https://github.com/quickpose/quickpose-ios-sdk.git', :tag => quickpose_ios_tag
